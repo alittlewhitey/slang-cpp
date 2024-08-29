@@ -122,6 +122,21 @@ namespace slang_cpp{
                 reinterpret_cast<slang::IBlob **>(outDiagnostics->get_value())));
     }
 
+    SlangResult slang_ISession::createCompositeComponentType(godot::TypedArray<slang_IComponentType *> componentTypes,
+                                                             SlangInt componentTypeCount,
+                                                             slang_PTR<slang_IComponentType *> *outCompositeComponentType,
+                                                             slang_PTR<slang_IBlob *> *outDiagnostics) {
+        slang_IComponentType * ptrs[componentTypeCount];
+        for(int i = 0;i!= componentTypeCount;++i){
+            ptrs[i] = static_cast<slang_IComponentType *>(componentTypes[i].operator Object *());
+        }
+        return this->slang::ISession::createCompositeComponentType(
+                reinterpret_cast<slang::IComponentType **>(ptrs), componentTypeCount,
+                reinterpret_cast<slang::IComponentType **>(outCompositeComponentType->get_value()),
+                reinterpret_cast<slang::IBlob **>(outDiagnostics->get_value()));
+
+    }
+
     slang_ISharedLibraryLoader *slang_IGlobalSession::getSharedLibraryLoader(slang_NULL *) {
         return dynamic_cast<slang_ISharedLibraryLoader *>(this->slang::IGlobalSession::getSharedLibraryLoader());
     }

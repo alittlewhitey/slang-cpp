@@ -13,6 +13,7 @@ namespace slang_cpp{
     enum slang_CompilerOptionValueKind{
         Int,String
     };
+
     enum slang_CompilerOptionName{
         MacroDefine,        // stringValue0: macro name;  stringValue1: macro value
         DepFile,
@@ -597,6 +598,8 @@ namespace slang_cpp {
 
     class slang_DOUBLE;
 
+    class slang_global;
+
     class slang_SlangRef;
 
     class slang_IUnknown;
@@ -729,7 +732,9 @@ namespace slang_cpp {
 
     class slang_global : public slang_SlangObject{
     GDCLASS(slang_global,slang_SlangObject)
-        static void _bind_methods() {}
+        static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("createGlobalSession", "outGlobalSession"), &slang_global::createGlobalSession);
+        }
         static slang_global* single_ptr;
     public:
         slang_global(){
@@ -1020,8 +1025,8 @@ namespace slang_cpp {
                                                                    reinterpret_cast<slang::ISession **>(outSession->get_value()));
         }
 
-        int findProfile(godot::String name) noexcept {
-            return (int) this->slang::IGlobalSession::findProfile(name.utf8().get_data());
+        slang_SlangProfileID findProfile(godot::String name) noexcept {
+            return static_cast<slang_SlangProfileID>(this->slang::IGlobalSession::findProfile(name.utf8().get_data()));
         }
 
         void setDownstreamCompilerPath(slang_SlangPassThrough passThrough, godot::String path) {
@@ -1198,15 +1203,9 @@ namespace slang_cpp {
         slang_IModule *loadModuleFromSource(godot::String moduleName, godot::String path, slang_IBlob *source,
                                             slang_PTR<slang_IBlob *> *outDiagnostics);
 
-        SlangResult createCompositeComponentType(slang_PTR<slang_IComponentType *>*componentTypes, SlangInt componentTypeCount,
+        SlangResult createCompositeComponentType(godot::TypedArray<slang_IComponentType *>componentTypes, SlangInt componentTypeCount,
                                                  slang_PTR<slang_IComponentType *>*outCompositeComponentType,
-                                                         slang_PTR<slang_IBlob *>*outDiagnostics) {
-            return this->slang::ISession::createCompositeComponentType(
-                    reinterpret_cast<slang::IComponentType **>(componentTypes->get_value()), componentTypeCount,
-                    reinterpret_cast<slang::IComponentType **>(outCompositeComponentType->get_value()),
-                    reinterpret_cast<slang::IBlob **>(outDiagnostics->get_value()));
-
-        }
+                                                         slang_PTR<slang_IBlob *>*outDiagnostics);
         slang_TypeReflection* specializeType(slang_TypeReflection* type_, slang_SpecializationArg* specializationArgs, SlangInt specializationArgCount, slang_PTR<slang_IBlob *>* outDiagnostics);
         slang_TypeLayoutReflection* getTypeLayout(slang_TypeReflection* type_, SlangInt targetIndex, slang_LayoutRules rules, slang_PTR<slang_IBlob *>* outDiagnostics);
         slang_TypeReflection* getContainerType(slang_TypeReflection* elementType, slang_ContainerType containerType, slang_PTR<slang_IBlob *>* outDiagnostics);
@@ -1236,8 +1235,8 @@ namespace slang_cpp {
             godot::ClassDB::bind_method(godot::D_METHOD("getBufferSize"), &slang_IBlob::getBufferSize);
         }
     public:
-        slang_PTR<void>* getBufferPointer(slang_NULL *null){
-            return static_cast<slang_PTR<void> *>(const_cast<void *>(this->slang::IBlob::getBufferPointer()));
+        slang_PTR<const void>* getBufferPointer(slang_NULL *null){
+            return static_cast<slang_PTR<const void> *>(const_cast<void *>(this->slang::IBlob::getBufferPointer()));
         }
         size_t getBufferSize() override{
             return this->slang::IBlob::getBufferSize();

@@ -20,6 +20,7 @@ void initialize_changeScene_module(ModuleInitializationLevel p_level){
     GDREGISTER_CLASS(slang_cpp::slang_BOOL)
     GDREGISTER_CLASS(slang_cpp::slang_DOUBLE)
     GDREGISTER_CLASS(slang_cpp::slang_SlangRef)
+    GDREGISTER_CLASS(slang_cpp::slang_global)
     GDREGISTER_ABSTRACT_CLASS(slang_cpp::slang_IUnknown)
     GDREGISTER_ABSTRACT_CLASS(slang_cpp::slang_IGlobalSession)
     GDREGISTER_ABSTRACT_CLASS(slang_cpp::slang_ISession)

@@ -4,159 +4,159 @@
 namespace slang_cpp{
     slang_global* slang_global::single_ptr = nullptr;
 
-    slang_ShaderReflection *slang_IComponentType::getLayout(SlangInt targetIndex, slang_PTR<slang_IBlob *> *blob) {
-        return static_cast<slang_ShaderReflection *>(this->IComponentType::getLayout(targetIndex, reinterpret_cast<ISlangBlob **>(blob == nullptr? nullptr: blob->get_value())));
+
+    slang_ShaderReflection *slang_IComponentType::_getLayout(SlangInt targetIndex, slang_IBlob_PTR *blob) {
+        return static_cast<slang_ShaderReflection *>(this->getLayout(targetIndex, reinterpret_cast<ISlangBlob **>(blob == nullptr? nullptr: &blob->value)));
     }
 
     SlangResult
-    slang_IComponentType::specialize(slang_SpecializationArg *specializationArgs, SlangInt specializationArgCount,
-                                     slang_PTR<slang_IComponentType *>*specializedOut, slang_PTR<slang_IBlob *> *outDiagnostics) {
-        return this->IComponentType::specialize(
-                static_cast<slang::SpecializationArg *>(specializationArgs), specializationArgCount, reinterpret_cast<IComponentType **>(specializedOut->get_value()), reinterpret_cast<ISlangBlob **>(outDiagnostics == nullptr ? nullptr : outDiagnostics->get_value()));
+    slang_IComponentType::_specialize(slang_SpecializationArg *specializationArgs, SlangInt specializationArgCount,
+                                     slang_IComponentType_PTR*specializedOut, slang_IBlob_PTR *outDiagnostics) {
+        return this->specialize(
+                static_cast<slang::SpecializationArg *>(specializationArgs), specializationArgCount, reinterpret_cast<IComponentType **>(&specializedOut->value), reinterpret_cast<ISlangBlob **>(outDiagnostics == nullptr ? nullptr : &outDiagnostics->value));
     }
 
-    SlangResult slang_IComponentType::linkWithOptions(slang_PTR<slang_IComponentType *>*outLinkedComponentType,
+    SlangResult slang_IComponentType::_linkWithOptions(slang_IComponentType_PTR*outLinkedComponentType,
                                                       uint32_t compilerOptionEntryCount,
                                                       slang_CompilerOptionEntry *compilerOptionEntries,
-                                                      slang_PTR<slang_IBlob *> *outDiagnostics) {
-        return this->IComponentType::linkWithOptions(reinterpret_cast<IComponentType **>(outLinkedComponentType->get_value()), compilerOptionEntryCount,
-                                                     static_cast<slang::CompilerOptionEntry *>(compilerOptionEntries), reinterpret_cast<ISlangBlob **>(outDiagnostics == nullptr ? nullptr : outDiagnostics->get_value()));
+                                                      slang_IBlob_PTR *outDiagnostics) {
+        return this->linkWithOptions(reinterpret_cast<IComponentType **>(&outLinkedComponentType->value), compilerOptionEntryCount,
+                                                     static_cast<slang::CompilerOptionEntry *>(compilerOptionEntries), reinterpret_cast<ISlangBlob **>(outDiagnostics == nullptr ? nullptr : &outDiagnostics->value));
     }
 
 
-    slang_DeclReflection *slang_IModule::getModuleReflection(slang_NULL*null) {
-        return static_cast<slang_DeclReflection *>(this->IModule::getModuleReflection());
+    slang_DeclReflection *slang_IModule::_getModuleReflection(slang_NULL*null) {
+        return static_cast<slang_DeclReflection *>(this->getModuleReflection());
     }
 
-    slang_IModule *slang_ISession::loadModule(godot::String moduleName, slang_PTR<slang_IBlob *> *outDiagnostics) {
-        return static_cast<slang_IModule *>(this->slang::ISession::loadModule(moduleName.utf8().get_data(),
-                                                                              reinterpret_cast<slang::IBlob **>(outDiagnostics->get_value())));
+    slang_IModule *slang_ISession::_loadModule(godot::String moduleName, slang_IBlob_PTR *outDiagnostics) {
+        return static_cast<slang_IModule *>(this->loadModule(moduleName.utf8().get_data(),
+                                                                              reinterpret_cast<slang::IBlob **>(&outDiagnostics->value)));
     }
 
-    slang_IModule *slang_ISession::loadModuleFromSource(godot::String moduleName, godot::String path, slang_IBlob *source,slang_PTR<slang_IBlob *> *outDiagnostics) {
-        return dynamic_cast<slang_IModule *>(this->slang::ISession::loadModuleFromSource(moduleName.utf8().get_data(),
+    slang_IModule *slang_ISession::_loadModuleFromSource(godot::String moduleName, godot::String path, slang_IBlob *source,slang_IBlob_PTR *outDiagnostics) {
+        return dynamic_cast<slang_IModule *>(this->loadModuleFromSource(moduleName.utf8().get_data(),
                                                                                          path.utf8().get_data(),
                                                                                          dynamic_cast<slang::IBlob *>(source),
-                                                                                         reinterpret_cast<ISlangBlob **>(outDiagnostics->get_value())));
+                                                                                         reinterpret_cast<ISlangBlob **>(&outDiagnostics->value)));
     }
 
     slang_TypeReflection *
-    slang_ISession::specializeType(slang_TypeReflection *type_, slang_SpecializationArg *specializationArgs,
-                                   SlangInt specializationArgCount, slang_PTR<slang_IBlob *> *outDiagnostics) {
-        return static_cast<slang_TypeReflection *>(this->slang::ISession::specializeType(type_, specializationArgs,
+    slang_ISession::_specializeType(slang_TypeReflection *type_, slang_SpecializationArg *specializationArgs,
+                                   SlangInt specializationArgCount, slang_IBlob_PTR*outDiagnostics) {
+        return static_cast<slang_TypeReflection *>(this->specializeType(type_, specializationArgs,
                                                                                          specializationArgCount,
-                                                                                         reinterpret_cast<slang::IBlob **>(outDiagnostics->get_value())));
+                                                                                         reinterpret_cast<slang::IBlob **>(&outDiagnostics->value)));
     }
 
     slang_TypeLayoutReflection *
-    slang_ISession::getTypeLayout(slang_TypeReflection *type_, SlangInt targetIndex, slang_LayoutRules rules,
-                                  slang_PTR<slang_IBlob *> *outDiagnostics) {
-        return static_cast<slang_TypeLayoutReflection *>(this->slang::ISession::getTypeLayout(type_, targetIndex,
+    slang_ISession::_getTypeLayout(slang_TypeReflection *type_, SlangInt targetIndex, slang_LayoutRules rules,
+                                  slang_IBlob_PTR*outDiagnostics) {
+        return static_cast<slang_TypeLayoutReflection *>(this->getTypeLayout(type_, targetIndex,
                                                                                               static_cast<slang::LayoutRules>(rules),
-                                                                                              reinterpret_cast<slang::IBlob **>(outDiagnostics->get_value())));
+                                                                                              reinterpret_cast<slang::IBlob **>(&outDiagnostics->value)));
     }
 
     slang_TypeReflection *
-    slang_ISession::getContainerType(slang_TypeReflection *elementType, slang_ContainerType containerType,
-                                     slang_PTR<slang_IBlob *> *outDiagnostics) {
-        return static_cast<slang_TypeReflection *>(this->slang::ISession::getContainerType(
+    slang_ISession::_getContainerType(slang_TypeReflection *elementType, slang_ContainerType containerType,
+                                     slang_IBlob_PTR *outDiagnostics) {
+        return static_cast<slang_TypeReflection *>(this->getContainerType(
                 static_cast<slang::TypeReflection *>(elementType),
-                static_cast<slang::ContainerType>(containerType), reinterpret_cast<slang::IBlob **>(outDiagnostics->get_value())));
+                static_cast<slang::ContainerType>(containerType), reinterpret_cast<slang::IBlob **>(&outDiagnostics->value)));
     }
 
-    slang_TypeReflection *slang_ISession::getDynamicType(slang_NULL*) {
-        return static_cast<slang_TypeReflection *>(this->slang::ISession::getDynamicType());
+    slang_TypeReflection *slang_ISession::_getDynamicType(slang_NULL*) {
+        return static_cast<slang_TypeReflection *>(this->getDynamicType());
     }
 
-    SlangResult slang_ISession::getTypeRTTIMangledName(slang_TypeReflection *type, slang_PTR<slang_IBlob *> *outNameBlob) {
-        return this->slang::ISession::getTypeRTTIMangledName(static_cast<slang::TypeReflection*>(type), reinterpret_cast<slang::IBlob**>(outNameBlob->get_value()));
+    SlangResult slang_ISession::_getTypeRTTIMangledName(slang_TypeReflection *type, slang_IBlob_PTR *outNameBlob) {
+        return this->getTypeRTTIMangledName(static_cast<slang::TypeReflection*>(type), reinterpret_cast<slang::IBlob**>(&outNameBlob->value));
     }
 
-    SlangResult slang_ISession::getTypeConformanceWitnessMangledName(slang_TypeReflection *type,
+    SlangResult slang_ISession::_getTypeConformanceWitnessMangledName(slang_TypeReflection *type,
                                                                      slang_TypeReflection *interfaceType,
-                                                                     slang_PTR<slang_IBlob *> *outNameBlob) {
-        return this->slang::ISession::getTypeConformanceWitnessMangledName(static_cast<slang::TypeReflection*>(type), static_cast<slang::TypeReflection*>(interfaceType), reinterpret_cast<slang::IBlob**>(outNameBlob->get_value()));
+                                                                     slang_IBlob_PTR *outNameBlob) {
+        return this->getTypeConformanceWitnessMangledName(static_cast<slang::TypeReflection*>(type), static_cast<slang::TypeReflection*>(interfaceType), reinterpret_cast<slang::IBlob**>(outNameBlob->get_value()));
     }
 
-    SlangResult slang_ISession::getTypeConformanceWitnessSequentialID(slang_TypeReflection *type,
+    SlangResult slang_ISession::_getTypeConformanceWitnessSequentialID(slang_TypeReflection *type,
                                                                       slang_TypeReflection *interfaceType,
-                                                                      slang_INT<uint32_t> *outId) {
+                                                                      slang_SIZE*outId) {
         uint32_t id;
-        SlangResult res = this->slang::ISession::getTypeConformanceWitnessSequentialID(static_cast<slang::TypeReflection*>(type), static_cast<slang::TypeReflection*>(interfaceType), &id);
+        SlangResult res = this->getTypeConformanceWitnessSequentialID(static_cast<slang::TypeReflection*>(type), static_cast<slang::TypeReflection*>(interfaceType), &id);
         outId->set_value(id);
         return res;
     }
 
     SlangResult
-    slang_ISession::createTypeConformanceComponentType(slang_TypeReflection *type, slang_TypeReflection *interfaceType,
-                                                       slang_PTR<slang_ITypeConformance *>*outConformance,
-                                                       SlangInt conformanceIdOverride, slang_PTR<slang_IBlob*> *outDiagnostics) {
-        return this->slang::ISession::createTypeConformanceComponentType(
-                static_cast<slang::TypeReflection *>(type), interfaceType, reinterpret_cast<slang::ITypeConformance **>(outConformance->get_value()), conformanceIdOverride,
-                reinterpret_cast<slang::IBlob **>(outDiagnostics->get_value()));
+    slang_ISession::_createTypeConformanceComponentType(slang_TypeReflection *type, slang_TypeReflection *interfaceType,
+                                                       slang_ITypeConformance_PTR*outConformance,
+                                                       SlangInt conformanceIdOverride, slang_IBlob_PTR *outDiagnostics) {
+        return this->createTypeConformanceComponentType(
+                static_cast<slang::TypeReflection *>(type), interfaceType, reinterpret_cast<slang::ITypeConformance **>(&outConformance->value), conformanceIdOverride,
+                reinterpret_cast<slang::IBlob **>(&outDiagnostics->value));
     }
 
     slang_IModule *
-    slang_ISession::loadModuleFromIRBlob(godot::String moduleName, godot::String path, slang_IBlob *source,
-                                         slang_PTR<slang_IBlob*> *outDiagnostics) {
-        return dynamic_cast<slang_IModule *>(this->slang::ISession::loadModuleFromIRBlob(moduleName.utf8().get_data(),
+    slang_ISession::_loadModuleFromIRBlob(godot::String moduleName, godot::String path, slang_IBlob *source,
+                                         slang_IBlob_PTR *outDiagnostics) {
+        return dynamic_cast<slang_IModule *>(this->loadModuleFromIRBlob(moduleName.utf8().get_data(),
                                                                                          path.utf8().get_data(),
                                                                                          static_cast<slang::IBlob *>(source),
-                                                                                         reinterpret_cast<slang::IBlob **>(outDiagnostics->get_value())));
+                                                                                         reinterpret_cast<slang::IBlob **>(&outDiagnostics->value)));
     }
 
-    slang_IModule *slang_ISession::getLoadedModule(SlangInt index, slang_NULL *) {
-        return static_cast<slang_IModule *>(this->slang::ISession::getLoadedModule(index));
+    slang_IModule *slang_ISession::_getLoadedModule(SlangInt index, slang_NULL *) {
+        return static_cast<slang_IModule *>(this->getLoadedModule(index));
     }
 
-    bool slang_ISession::isBinaryModuleUpToDate(godot::String modulePath, slang_IBlob *binaryModuleBlob) {
-        return this->slang::ISession::isBinaryModuleUpToDate(modulePath.utf8().get_data(),
+    bool slang_ISession::_isBinaryModuleUpToDate(godot::String modulePath, slang_IBlob *binaryModuleBlob) {
+        return this->isBinaryModuleUpToDate(modulePath.utf8().get_data(),
                                                              static_cast<slang::IBlob *>(binaryModuleBlob));
     }
 
     slang_IModule *
-    slang_ISession::loadModuleFromSourceString(godot::String moduleName, godot::String path, godot::String string,
-                                               slang_PTR<slang_IBlob*> *outDiagnostics) {
-        return static_cast<slang_IModule *>(this->slang::ISession::loadModuleFromSourceString(
+    slang_ISession::_loadModuleFromSourceString(godot::String moduleName, godot::String path, godot::String string,
+                                               slang_IBlob_PTR*outDiagnostics) {
+        return static_cast<slang_IModule *>(this->loadModuleFromSourceString(
                 moduleName.utf8().get_data(), path.utf8().get_data(), string.utf8().get_data(),
-                reinterpret_cast<slang::IBlob **>(outDiagnostics->get_value())));
+                reinterpret_cast<slang::IBlob **>(&outDiagnostics->value)));
     }
-
-    SlangResult slang_ISession::createCompositeComponentType(godot::TypedArray<slang_IComponentType *> componentTypes,
-                                                             SlangInt componentTypeCount,
-                                                             slang_PTR<slang_IComponentType *> *outCompositeComponentType,
-                                                             slang_PTR<slang_IBlob *> *outDiagnostics) {
-        slang_IComponentType * ptrs[componentTypeCount];
-        for(int i = 0;i!= componentTypeCount;++i){
-            ptrs[i] = static_cast<slang_IComponentType *>(componentTypes[i].operator Object *());
+    SlangResult slang_ISession::_createCompositeComponentType(slang_IComponentType_VECTOR* componentTypes,
+                                                             slang_IComponentType_PTR *outCompositeComponentType,
+                                                             slang_IBlob_PTR *outDiagnostics) {
+        auto size = componentTypes->size();
+        slang::IComponentType* ptrs[size];
+        for(int i = 0;i!= size;i++){
+            ptrs[i] = (*componentTypes)[i];
         }
-        return this->slang::ISession::createCompositeComponentType(
-                reinterpret_cast<slang::IComponentType **>(ptrs), componentTypeCount,
+        return this->createCompositeComponentType(
+                const_cast<slang::IComponentType *const *>(ptrs), size,
                 reinterpret_cast<slang::IComponentType **>(outCompositeComponentType->get_value()),
                 reinterpret_cast<slang::IBlob **>(outDiagnostics->get_value()));
-
     }
 
-    slang_ISharedLibraryLoader *slang_IGlobalSession::getSharedLibraryLoader(slang_NULL *) {
-        return dynamic_cast<slang_ISharedLibraryLoader *>(this->slang::IGlobalSession::getSharedLibraryLoader());
+    slang_ISharedLibraryLoader *slang_IGlobalSession::_getSharedLibraryLoader(slang_NULL *) {
+        return dynamic_cast<slang_ISharedLibraryLoader *>(this->getSharedLibraryLoader());
     }
 
-    SlangResult slang_IGlobalSession::parseCommandLineArguments(int argc, godot::TypedArray<godot::String> argv,
+    SlangResult slang_IGlobalSession::_parseCommandLineArguments(godot::TypedArray<godot::String> args,
                                                                 slang_SessionDesc *outSessionDesc,
-                                                                slang_PTR<slang_IUnknown *>*outAuxAllocation) {
-        const char* argv_ptr[argc];
-        for(int i = 0; i < argc; i++) {
-            godot::String str = argv[i];
+                                                                slang_IUnknown_PTR*outAuxAllocation) {
+        auto size = args.size();
+        const char* argv_ptr[size];
+        for(int i = 0; i < size; i++) {
+            godot::String str = args[i];
             argv_ptr[i] = str.utf8().get_data();
         }
-        return this->slang::IGlobalSession::parseCommandLineArguments(argc,argv_ptr,
+        return this->parseCommandLineArguments(size,argv_ptr,
                                                                       dynamic_cast<slang::SessionDesc *>(outSessionDesc),
-                                                                      reinterpret_cast<ISlangUnknown **>(outAuxAllocation->get_value()));
+                                                                      reinterpret_cast<ISlangUnknown **>(&outAuxAllocation->value));
     }
 
-    SlangResult slang_IGlobalSession::getSessionDescDigest(slang_SessionDesc *sessionDesc, slang_PTR<slang_IBlob*>*outBlob) {
-        return this->slang::IGlobalSession::getSessionDescDigest(dynamic_cast<slang::SessionDesc *>(sessionDesc),
-                                                                 reinterpret_cast<ISlangBlob **>(outBlob->get_value()));
+    SlangResult slang_IGlobalSession::_getSessionDescDigest(slang_SessionDesc *sessionDesc, slang_IBlob_PTR*outBlob) {
+        return this->getSessionDescDigest(dynamic_cast<slang::SessionDesc *>(sessionDesc),
+                                                                 reinterpret_cast<ISlangBlob **>(&outBlob->value));
     }
 
     slang_CompilerOptionValue* slang_CompilerOptionEntry::get_value() {
@@ -175,12 +175,22 @@ namespace slang_cpp{
         this->compilerOptionEntries = compilerOptionEntries;
     }
 
-    slang_TargetDesc *slang_SessionDesc::get_targets() {
-        return const_cast<slang_TargetDesc *>(static_cast<const slang_TargetDesc *>(targets));
+    godot::Array slang_SessionDesc::get_targets() {
+        godot::Array a;
+        for(int i = 0; i < targetCount; i++){
+            a[i] = static_cast<slang_TargetDesc*>(const_cast<slang::TargetDesc*>(&targets[i]));
+        }
+
+        return a;
     }
 
-    void slang_SessionDesc::set_targets(const slang_TargetDesc *targets) {
-        this->targets = targets;
+    void slang_SessionDesc::set_targets(godot::Array targets) {
+        delete[] this->targets;
+        int size = targets.size();
+        this->targets = new slang::TargetDesc[size];
+        for(int i = 0;i!=size;++i){
+            *const_cast<slang::TargetDesc*>(&this->targets[i]) = *dynamic_cast<slang::TargetDesc*>(targets[i].operator Object *());
+        }
     }
 
     slang_PreprocessorMacroDesc *slang_SessionDesc::get_preprocessorMacros() {
@@ -235,8 +245,12 @@ namespace slang_cpp{
         return static_cast<slang_TypeLayoutReflection *>(this->slang::VariableLayoutReflection::getTypeLayout());
     }
 
-    slang_FunctionReflection *slang_IEntryPoint::getFunctionReflection(slang_NULL *) {
-        return static_cast<slang_FunctionReflection *>(this->IEntryPoint::getFunctionReflection());
+    slang_FunctionReflection *slang_IEntryPoint::_getFunctionReflection(slang_NULL *) {
+        return static_cast<slang_FunctionReflection *>(this->getFunctionReflection());
+    }
+
+    godot::String slang_ICastable::_castAs(slang_UUID *uuid, slang_NULL *null) {
+        return (char*)(this->castAs(static_cast<SlangUUID>(*uuid)));
     }
 }
 #endif

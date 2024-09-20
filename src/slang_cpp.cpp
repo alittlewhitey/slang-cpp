@@ -125,15 +125,11 @@ namespace slang_cpp{
     SlangResult slang_ISession::_createCompositeComponentType(slang_IComponentType_VECTOR* componentTypes,
                                                              slang_IComponentType_PTR *outCompositeComponentType,
                                                              slang_IBlob_PTR *outDiagnostics) {
-        auto size = componentTypes->size();
-        slang::IComponentType* ptrs[size];
-        for(int i = 0;i!= size;i++){
-            ptrs[i] = (*componentTypes)[i];
-        }
         return this->createCompositeComponentType(
-                const_cast<slang::IComponentType *const *>(ptrs), size,
-                reinterpret_cast<slang::IComponentType **>(outCompositeComponentType->get_value()),
-                reinterpret_cast<slang::IBlob **>(outDiagnostics->get_value()));
+                reinterpret_cast<slang::IComponentType *const *>(componentTypes->data()),
+                componentTypes->size(),
+                reinterpret_cast<slang::IComponentType **>(&outCompositeComponentType->value),
+                reinterpret_cast<slang::IBlob **>(&outDiagnostics->value));
     }
 
     slang_ISharedLibraryLoader *slang_IGlobalSession::_getSharedLibraryLoader(slang_NULL *) {
@@ -157,6 +153,11 @@ namespace slang_cpp{
     SlangResult slang_IGlobalSession::_getSessionDescDigest(slang_SessionDesc *sessionDesc, slang_IBlob_PTR*outBlob) {
         return this->getSessionDescDigest(dynamic_cast<slang::SessionDesc *>(sessionDesc),
                                                                  reinterpret_cast<ISlangBlob **>(&outBlob->value));
+    }
+
+    SlangResult slang_IGlobalSession::_createSession(slang_SessionDesc *desc, slang_ISession_PTR *outSession) {
+        return this->createSession(desc->duplicate(),
+                                   reinterpret_cast<slang::ISession **>(&outSession->value));
     }
 
     slang_CompilerOptionValue* slang_CompilerOptionEntry::get_value() {
@@ -184,13 +185,8 @@ namespace slang_cpp{
         return a;
     }
 
-    void slang_SessionDesc::set_targets(godot::Array targets) {
-        delete[] this->targets;
-        int size = targets.size();
-        this->targets = new slang::TargetDesc[size];
-        for(int i = 0;i!=size;++i){
-            *const_cast<slang::TargetDesc*>(&this->targets[i]) = *dynamic_cast<slang::TargetDesc*>(targets[i].operator Object *());
-        }
+    void slang_SessionDesc::set_targets(slang_TargetDesc_VALUE_VECTOR* targets) {
+        this->targets = targets->data();
     }
 
     slang_PreprocessorMacroDesc *slang_SessionDesc::get_preprocessorMacros() {

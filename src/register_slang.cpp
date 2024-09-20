@@ -21,6 +21,7 @@ void initialize_slang_cpp_module(ModuleInitializationLevel p_level){
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
+
     SLANG_BIND_CLASS(SlangObject)
     SLANG_BIND_CLASS(NULL)
     SLANG_BIND_CLASS(INT)
@@ -67,7 +68,6 @@ void initialize_slang_cpp_module(ModuleInitializationLevel p_level){
     SLANG_BIND_CLASS(EntryPointReflection)
     SLANG_BIND_CLASS(ShaderReflection)
     SLANG_BIND_CLASS(SpecializationArg)
-
 
     Engine::get_singleton()->register_singleton("slang_global",slang_cpp::slang_global::get_singleton());
 }

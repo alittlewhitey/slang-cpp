@@ -5,28 +5,44 @@ namespace slang_cpp{
     slang_global* slang_global::single_ptr = nullptr;
 
 
-    slang_ShaderReflection *slang_IComponentType::_getLayout(SlangInt targetIndex, slang_IBlob_PTR *blob) {
-        return static_cast<slang_ShaderReflection *>(this->getLayout(targetIndex, reinterpret_cast<ISlangBlob **>(blob == nullptr? nullptr: &blob->value)));
+    slang_ShaderReflection_HEAP_PTR *slang_IComponentType::_getLayout(SlangInt targetIndex, slang_IBlob_PTR *blob) {
+        auto* a = new slang_ShaderReflection(this->getLayout(targetIndex, reinterpret_cast<ISlangBlob **>(blob == nullptr? nullptr: &blob->value)));
+        auto* ptr = new slang_ShaderReflection_HEAP_PTR(a);
+        ptr->set_shouldFreeData(true);
+        return ptr;
     }
 
     SlangResult
-    slang_IComponentType::_specialize(slang_SpecializationArg *specializationArgs, SlangInt specializationArgCount,
+    slang_IComponentType::_specialize(slang_SpecializationArg_VECTOR *specializationArgs, SlangInt specializationArgCount,
                                      slang_IComponentType_PTR*specializedOut, slang_IBlob_PTR *outDiagnostics) {
+        slang::SpecializationArg args[specializationArgCount];
+        for(int i = 0;i!=specializationArgCount;++i){
+            args[i] = specializationArgs->at(i)->duplicate();
+        }
         return this->specialize(
-                static_cast<slang::SpecializationArg *>(specializationArgs), specializationArgCount, reinterpret_cast<IComponentType **>(&specializedOut->value), reinterpret_cast<ISlangBlob **>(outDiagnostics == nullptr ? nullptr : &outDiagnostics->value));
+                args, specializationArgCount, reinterpret_cast<IComponentType **>(&specializedOut->value), reinterpret_cast<ISlangBlob **>(outDiagnostics == nullptr ? nullptr : &outDiagnostics->value));
     }
 
     SlangResult slang_IComponentType::_linkWithOptions(slang_IComponentType_PTR*outLinkedComponentType,
                                                       uint32_t compilerOptionEntryCount,
                                                       slang_CompilerOptionEntry *compilerOptionEntries,
                                                       slang_IBlob_PTR *outDiagnostics) {
-        return this->linkWithOptions(reinterpret_cast<IComponentType **>(&outLinkedComponentType->value), compilerOptionEntryCount,
-                                                     static_cast<slang::CompilerOptionEntry *>(compilerOptionEntries), reinterpret_cast<ISlangBlob **>(outDiagnostics == nullptr ? nullptr : &outDiagnostics->value));
+        auto a = compilerOptionEntries->duplicate();
+        auto res = this->linkWithOptions(reinterpret_cast<IComponentType **>(&outLinkedComponentType->value), compilerOptionEntryCount,
+                                                     &a, reinterpret_cast<ISlangBlob **>(outDiagnostics == nullptr ? nullptr : &outDiagnostics->value));
+        return res;
+    }
+
+    slang_ShaderReflection* slang_IComponentType::a(SlangInt targetIndex, slang_IBlob_PTR *blob) {
+        return new slang_ShaderReflection(this->getLayout(targetIndex, reinterpret_cast<ISlangBlob **>(blob == nullptr? nullptr: &blob->value)));
     }
 
 
-    slang_DeclReflection *slang_IModule::_getModuleReflection(slang_NULL*null) {
-        return static_cast<slang_DeclReflection *>(this->getModuleReflection());
+    slang_DeclReflection_HEAP_PTR *slang_IModule::_getModuleReflection() {
+        auto* a = new slang_DeclReflection(this->getModuleReflection());
+        auto* ptr = new slang_DeclReflection_HEAP_PTR(a);
+        ptr->set_shouldFreeData(true);
+        return ptr;
     }
 
     slang_IModule *slang_ISession::_loadModule(godot::String moduleName, slang_IBlob_PTR *outDiagnostics) {
@@ -40,50 +56,64 @@ namespace slang_cpp{
                                                                                          dynamic_cast<slang::IBlob *>(source),
                                                                                          reinterpret_cast<ISlangBlob **>(&outDiagnostics->value)));
     }
-
-    slang_TypeReflection *
-    slang_ISession::_specializeType(slang_TypeReflection *type_, slang_SpecializationArg *specializationArgs,
-                                   SlangInt specializationArgCount, slang_IBlob_PTR*outDiagnostics) {
-        return static_cast<slang_TypeReflection *>(this->specializeType(type_, specializationArgs,
-                                                                                         specializationArgCount,
-                                                                                         reinterpret_cast<slang::IBlob **>(&outDiagnostics->value)));
+    slang_TypeReflection_HEAP_PTR *slang_ISession::_specializeType(slang_TypeReflection *type_, slang_SpecializationArg_VECTOR *specializationArgs,
+                                                                   SlangInt specializationArgCount, slang_IBlob_PTR*outDiagnostics) {
+        slang::SpecializationArg args[specializationArgCount];
+        for(int i = 0;i!= specializationArgCount;++i){
+            args[i] = specializationArgs->at(i)->duplicate();
+        }
+        auto* a = new slang_TypeReflection(this->specializeType(type_->value, args,
+                                                                           specializationArgCount,
+                                        reinterpret_cast<slang::IBlob **>(&outDiagnostics->value)));
+        auto* ptr = new slang_TypeReflection_HEAP_PTR(a);
+        ptr->set_shouldFreeData(true);
+        return ptr;
     }
 
-    slang_TypeLayoutReflection *
+    slang_TypeLayoutReflection_HEAP_PTR *
     slang_ISession::_getTypeLayout(slang_TypeReflection *type_, SlangInt targetIndex, slang_LayoutRules rules,
                                   slang_IBlob_PTR*outDiagnostics) {
-        return static_cast<slang_TypeLayoutReflection *>(this->getTypeLayout(type_, targetIndex,
-                                                                                              static_cast<slang::LayoutRules>(rules),
-                                                                                              reinterpret_cast<slang::IBlob **>(&outDiagnostics->value)));
+        auto* a = new slang_TypeLayoutReflection(this->getTypeLayout(type_->value, targetIndex,
+                                                                      static_cast<slang::LayoutRules>(rules),
+                                                                 reinterpret_cast<slang::IBlob **>(&outDiagnostics->value)));
+        auto* ptr = new slang_TypeLayoutReflection_HEAP_PTR(a);
+        ptr->set_shouldFreeData(true);
+        return ptr;
     }
 
-    slang_TypeReflection *
+    slang_TypeReflection_HEAP_PTR *
     slang_ISession::_getContainerType(slang_TypeReflection *elementType, slang_ContainerType containerType,
                                      slang_IBlob_PTR *outDiagnostics) {
-        return static_cast<slang_TypeReflection *>(this->getContainerType(
-                static_cast<slang::TypeReflection *>(elementType),
-                static_cast<slang::ContainerType>(containerType), reinterpret_cast<slang::IBlob **>(&outDiagnostics->value)));
+        auto* a = new slang_TypeReflection(this->getContainerType(elementType->value,
+                                                                   static_cast<slang::ContainerType>(containerType),
+                                                                   reinterpret_cast<slang::IBlob **>(&outDiagnostics->value)));
+        auto* ptr = new slang_TypeReflection_HEAP_PTR(a);
+        ptr->set_shouldFreeData(true);
+        return ptr;
     }
 
-    slang_TypeReflection *slang_ISession::_getDynamicType(slang_NULL*) {
-        return static_cast<slang_TypeReflection *>(this->getDynamicType());
+    slang_TypeReflection_HEAP_PTR *slang_ISession::_getDynamicType() {
+        auto* a = new slang_TypeReflection(this->getDynamicType());
+        auto* ptr = new slang_TypeReflection_HEAP_PTR(a);
+        ptr->set_shouldFreeData(true);
+        return ptr;
     }
 
     SlangResult slang_ISession::_getTypeRTTIMangledName(slang_TypeReflection *type, slang_IBlob_PTR *outNameBlob) {
-        return this->getTypeRTTIMangledName(static_cast<slang::TypeReflection*>(type), reinterpret_cast<slang::IBlob**>(&outNameBlob->value));
+        return this->getTypeRTTIMangledName(type->value, reinterpret_cast<slang::IBlob**>(&outNameBlob->value));
     }
 
     SlangResult slang_ISession::_getTypeConformanceWitnessMangledName(slang_TypeReflection *type,
                                                                      slang_TypeReflection *interfaceType,
                                                                      slang_IBlob_PTR *outNameBlob) {
-        return this->getTypeConformanceWitnessMangledName(static_cast<slang::TypeReflection*>(type), static_cast<slang::TypeReflection*>(interfaceType), reinterpret_cast<slang::IBlob**>(outNameBlob->get_value()));
+        return this->getTypeConformanceWitnessMangledName(type->value, interfaceType->value, reinterpret_cast<slang::IBlob**>(outNameBlob->get_value()));
     }
 
     SlangResult slang_ISession::_getTypeConformanceWitnessSequentialID(slang_TypeReflection *type,
                                                                       slang_TypeReflection *interfaceType,
                                                                       slang_SIZE*outId) {
         uint32_t id;
-        SlangResult res = this->getTypeConformanceWitnessSequentialID(static_cast<slang::TypeReflection*>(type), static_cast<slang::TypeReflection*>(interfaceType), &id);
+        SlangResult res = this->getTypeConformanceWitnessSequentialID(type->value, interfaceType->value, &id);
         outId->set_value(id);
         return res;
     }
@@ -93,7 +123,7 @@ namespace slang_cpp{
                                                        slang_ITypeConformance_PTR*outConformance,
                                                        SlangInt conformanceIdOverride, slang_IBlob_PTR *outDiagnostics) {
         return this->createTypeConformanceComponentType(
-                static_cast<slang::TypeReflection *>(type), interfaceType, reinterpret_cast<slang::ITypeConformance **>(&outConformance->value), conformanceIdOverride,
+                type->value, interfaceType->value, reinterpret_cast<slang::ITypeConformance **>(&outConformance->value), conformanceIdOverride,
                 reinterpret_cast<slang::IBlob **>(&outDiagnostics->value));
     }
 
@@ -106,7 +136,7 @@ namespace slang_cpp{
                                                                                          reinterpret_cast<slang::IBlob **>(&outDiagnostics->value)));
     }
 
-    slang_IModule *slang_ISession::_getLoadedModule(SlangInt index, slang_NULL *) {
+    slang_IModule *slang_ISession::_getLoadedModule(SlangInt index) {
         return static_cast<slang_IModule *>(this->getLoadedModule(index));
     }
 
@@ -160,93 +190,128 @@ namespace slang_cpp{
                                    reinterpret_cast<slang::ISession **>(&outSession->value));
     }
 
-    slang_CompilerOptionValue* slang_CompilerOptionEntry::get_value() {
-        return static_cast<slang_CompilerOptionValue*>(&value);
+    slang_CompilerOptionValue_HEAP_PTR* slang_CompilerOptionEntry::get_value() {
+        auto* ptr = new slang_CompilerOptionValue_HEAP_PTR(new slang_CompilerOptionValue(value));
+        ptr->shouldFreeData = true;
+        return ptr;
     }
 
     void slang_CompilerOptionEntry::set_value(slang_CompilerOptionValue* value) {
-        this->value = *value;
+        this->value = value->duplicate();
     }
 
-    slang_CompilerOptionEntry *slang_TargetDesc::get_compilerOptionEntries() {
-        return static_cast<slang_CompilerOptionEntry*>(compilerOptionEntries);
-    }
-
-    void slang_TargetDesc::set_compilerOptionEntries(slang_CompilerOptionEntry *compilerOptionEntries) {
-        this->compilerOptionEntries = compilerOptionEntries;
-    }
-
-    godot::Array slang_SessionDesc::get_targets() {
-        godot::Array a;
-        for(int i = 0; i < targetCount; i++){
-            a[i] = static_cast<slang_TargetDesc*>(const_cast<slang::TargetDesc*>(&targets[i]));
+    slang_CompilerOptionEntry_VALUE_VECTOR_HEAP_PTR *slang_TargetDesc::get_compilerOptionEntries() {
+        auto* a = new slang_CompilerOptionEntry_VALUE_VECTOR();
+        for(int i = 0;i!=value->compilerOptionEntryCount;++i){
+            a->push_back(value->compilerOptionEntries[i]);
         }
+        auto* ptr = new slang_CompilerOptionEntry_VALUE_VECTOR_HEAP_PTR(a);
+        ptr->set_shouldFreeData(true);
+        return ptr;
+    }
 
-        return a;
+    void slang_TargetDesc::set_compilerOptionEntries(slang_CompilerOptionEntry_VALUE_VECTOR *compilerOptionEntries) {
+        this->value->compilerOptionEntries = compilerOptionEntries->data();
+    }
+
+    slang_TargetDesc_VALUE_VECTOR_HEAP_PTR* slang_SessionDesc::get_targets() {
+        auto* vec = new slang_TargetDesc_VALUE_VECTOR();
+        vec->reserve(value->targetCount);
+        for(int i = 0; i < value->targetCount; i++){
+            (*vec)[i] = value->targets[i];
+        }
+        auto* ptr = new slang_TargetDesc_VALUE_VECTOR_HEAP_PTR(vec);
+        ptr->set_shouldFreeData(true);
+        return ptr;
     }
 
     void slang_SessionDesc::set_targets(slang_TargetDesc_VALUE_VECTOR* targets) {
-        this->targets = targets->data();
-    }
-
-    slang_PreprocessorMacroDesc *slang_SessionDesc::get_preprocessorMacros() {
-        return const_cast<slang_PreprocessorMacroDesc *>(static_cast<const slang_PreprocessorMacroDesc *>(preprocessorMacros));
-    }
-
-    void slang_SessionDesc::set_preprocessorMacros(const slang_PreprocessorMacroDesc *preprocessorMacros) {
-        this->preprocessorMacros = preprocessorMacros;
+        this->value->targets = targets->data();
     }
 
     slang_IFileSystem *slang_SessionDesc::get_fileSystem() {
-        return dynamic_cast<slang_IFileSystem *>(fileSystem);
+        return dynamic_cast<slang_IFileSystem *>(value->fileSystem);
     }
 
     void slang_SessionDesc::set_fileSystem(slang_IFileSystem *fileSystem) {
-        this->fileSystem = fileSystem;
+        this->value->fileSystem = fileSystem;
     }
 
-    slang_CompilerOptionEntry *slang_SessionDesc::get_compilerOptionEntries() {
-        return static_cast<slang_CompilerOptionEntry *>(compilerOptionEntries);
+    slang_CompilerOptionEntry_VALUE_VECTOR_HEAP_PTR *slang_SessionDesc::get_compilerOptionEntries() {
+        auto*vec = new slang_CompilerOptionEntry_VALUE_VECTOR();
+        vec->reserve(value->compilerOptionEntryCount);
+        for(int i = 0;i!= value->compilerOptionEntryCount;++i){
+            (*vec)[i] = value->compilerOptionEntries[i];
+        }
+        auto* ptr = new slang_CompilerOptionEntry_VALUE_VECTOR_HEAP_PTR(vec);
+        ptr->set_shouldFreeData(true);
+        return ptr;
     }
 
-    void slang_SessionDesc::set_compilerOptionEntries(slang_CompilerOptionEntry *compilerOptionEntries) {
-        this->compilerOptionEntries = compilerOptionEntries;
+    void slang_SessionDesc::set_compilerOptionEntries(slang_CompilerOptionEntry_VALUE_VECTOR *compilerOptionEntries) {
+        this->value->compilerOptionEntryCount = compilerOptionEntries->size();
+        this->value->compilerOptionEntries = compilerOptionEntries->data();
     }
 
-    slang_TypeReflection *slang_UserAttribute::getArgumentType(uint32_t index) {
-        return static_cast<slang_TypeReflection *>(this->slang::UserAttribute::getArgumentType(index));
+    slang_TypeReflection_HEAP_PTR *slang_UserAttribute::getArgumentType(uint32_t index) {
+        auto* a = new slang_TypeReflection(this->value->getArgumentType(index));
+        auto* ptr = new slang_TypeReflection_HEAP_PTR(a);
+        ptr->set_shouldFreeData(true);
+        return ptr;
     }
 
-    slang_TypeReflection *slang_VariableReflection::getType(slang_NULL *) {
-        return static_cast<slang_TypeReflection *>(this->slang::VariableReflection::getType());
+    slang_TypeReflection_HEAP_PTR *slang_VariableReflection::getType() {
+        auto* a = new slang_TypeReflection(this->value->getType());
+        auto* ptr = new slang_TypeReflection_HEAP_PTR(a);
+        ptr->set_shouldFreeData(true);
+        return ptr;
     }
 
-    slang_TypeReflection *slang_FunctionReflection::getReturnType() {
-        return static_cast<slang_TypeReflection *>(this->slang::FunctionReflection::getReturnType());
+    slang_TypeReflection_HEAP_PTR *slang_FunctionReflection::getReturnType() {
+        auto* a = new slang_TypeReflection(this->value->getReturnType());
+        auto* ptr = new slang_TypeReflection_HEAP_PTR(a);
+        ptr->set_shouldFreeData(true);
+        return ptr;
     }
 
     slang_GenericReflection *slang_FunctionReflection::getGenericContainer() {
-        return static_cast<slang_GenericReflection *>(this->slang::FunctionReflection::getGenericContainer());
+        return static_cast<slang_GenericReflection *>(this->value->getGenericContainer());
     }
 
-    slang_TypeReflection *slang_DeclReflection::getType() {
-        return static_cast<slang_TypeReflection *>(this->slang::DeclReflection::getType());
+    slang_TypeReflection_HEAP_PTR *slang_DeclReflection::getType() {
+        auto* a = new slang_TypeReflection(this->value->getType());
+        auto* ptr = new slang_TypeReflection_HEAP_PTR(a);
+        ptr->set_shouldFreeData(true);
+        return ptr;
     }
 
     slang_GenericReflection *slang_DeclReflection::asGeneric() {
-        return static_cast<slang_GenericReflection *>(this->slang::DeclReflection::asGeneric());
+        return static_cast<slang_GenericReflection *>(this->value->asGeneric());
     }
 
-    slang_TypeLayoutReflection *slang_VariableLayoutReflection::getTypeLayout() {
-        return static_cast<slang_TypeLayoutReflection *>(this->slang::VariableLayoutReflection::getTypeLayout());
+    slang_TypeLayoutReflection_HEAP_PTR *slang_VariableLayoutReflection::getTypeLayout() {
+        auto* a = new slang_TypeLayoutReflection(this->value->getTypeLayout());
+        auto* ptr = new slang_TypeLayoutReflection_HEAP_PTR(a);
+        ptr->set_shouldFreeData(true);
+        return ptr;
     }
 
-    slang_FunctionReflection *slang_IEntryPoint::_getFunctionReflection(slang_NULL *) {
-        return static_cast<slang_FunctionReflection *>(this->getFunctionReflection());
+    slang_FunctionReflection_HEAP_PTR* slang_IEntryPoint::_getFunctionReflection() {
+        auto* a = new slang_FunctionReflection(this->getFunctionReflection());
+        auto* ptr = new slang_FunctionReflection_HEAP_PTR(a);
+        ptr->set_shouldFreeData(true);
+        return ptr;
     }
 
-    godot::String slang_ICastable::_castAs(slang_UUID *uuid, slang_NULL *null) {
+    godot::String slang_ICastable::_castAs(slang_UUID *uuid) {
         return (char*)(this->castAs(static_cast<SlangUUID>(*uuid)));
+    }
+
+    SlangResult slang_IUnknown::_query_interface(slang_UUID *guid, slang_VOID_PTR *outObj) {
+        void *obj = nullptr;
+        SlangResult res = this->queryInterface(guid->operator SlangUUID(), &obj);
+        outObj->set_value(obj);
+        return res;
     }
 }
 #endif

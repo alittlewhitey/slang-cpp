@@ -2007,10 +2007,10 @@ namespace slang_cpp {
         }
     private:
         static void _bind_methods(){
-            godot::ClassDB::bind_method(godot::D_METHOD("getEntryCount"), &slang_IProfiler::_getEntryCount);
-            godot::ClassDB::bind_method(godot::D_METHOD("getEntryName", "index"), &slang_IProfiler::_getEntryName);
-            godot::ClassDB::bind_method(godot::D_METHOD("getEntryTimeMS", "index"), &slang_IProfiler::_getEntryTimeMS);
-            godot::ClassDB::bind_method(godot::D_METHOD("getEntryInvocationTimes", "index"), &slang_IProfiler::_getEntryInvocationTimes);
+            // godot::ClassDB::bind_method(godot::D_METHOD("getEntryCount"), &slang_IProfiler::_getEntryCount);
+            // godot::ClassDB::bind_method(godot::D_METHOD("getEntryName", "index"), &slang_IProfiler::_getEntryName);
+            // godot::ClassDB::bind_method(godot::D_METHOD("getEntryTimeMS", "index"), &slang_IProfiler::_getEntryTimeMS);
+            // godot::ClassDB::bind_method(godot::D_METHOD("getEntryInvocationTimes", "index"), &slang_IProfiler::_getEntryInvocationTimes);
         }
     public:
         size_t _getEntryCount(){
@@ -2154,7 +2154,7 @@ namespace slang_cpp {
             godot::ClassDB::bind_method(godot::D_METHOD("setSkipSPIRVValidation","value"),&slang_ICompileRequest::_setSkipSPIRVValidation);
             godot::ClassDB::bind_method(godot::D_METHOD("setTargetUseMinimumSlangOptimization","targetIndex","value"),&slang_ICompileRequest::_setTargetUseMinimumSlangOptimization);
             godot::ClassDB::bind_method(godot::D_METHOD("setIgnoreCapabilityCheck","value"),&slang_ICompileRequest::_setIgnoreCapabilityCheck);
-            godot::ClassDB::bind_method(godot::D_METHOD("getCompileTimeProfile","compileTimeProfile","shouldClear"),&slang_ICompileRequest::_getCompileTimeProfile, &slang_ICompileRequest::getCompileTimeProfile);
+            // godot::ClassDB::bind_method(godot::D_METHOD("getCompileTimeProfile","compileTimeProfile","shouldClear"),&slang_ICompileRequest::_getCompileTimeProfile, &slang_ICompileRequest::getCompileTimeProfile);
             godot::ClassDB::bind_method(godot::D_METHOD("setTargetGenerateWholeProgram","targetIndex","value"),&slang_ICompileRequest::_setTargetGenerateWholeProgram);
             godot::ClassDB::bind_method(godot::D_METHOD("setTargetEmbedDXIL","targetIndex","value"),&slang_ICompileRequest::_setTargetEmbedDXIL);
         }
@@ -2227,11 +2227,13 @@ namespace slang_cpp {
             return this->addPreprocessorDefine(key.utf8().get_data(),value.utf8().get_data());
         }
         SlangResult _processCommandLineArguments(godot::TypedArray<godot::String> args, int argCount){
-            const char* argv[argCount];
+            const char** argv = new const char*[argCount];
             for(int i = 0; i < argCount; i++){
                 argv[i] = args[i].operator godot::String().utf8().get_data();
             }
-            return this->processCommandLineArguments(argv,argCount);
+            auto result = this->processCommandLineArguments(argv,argCount);
+            delete[] argv;
+            return result;
         }
         int _addTranslationUnit(slang_SlangSourceLanguage language,godot::String name){
             return this->addTranslationUnit(static_cast<SlangSourceLanguage>(language), name.utf8().get_data());
@@ -2261,18 +2263,22 @@ namespace slang_cpp {
             return this->addEntryPoint(translationUnitIndex,name.utf8().get_data(),static_cast<SlangStage>(stage));
         }
         int _addEntryPointEx(int translationUnitIndex,godot::String name,slang_SlangStage stage,int genericArgCount,godot::TypedArray<godot::String>genericArgs){
-            const char* args[genericArgCount];
+            const char** args = new const char*[genericArgCount];
             for(int i = 0; i < genericArgCount; i++) {
                 args[i] = genericArgs[i].operator godot::String().utf8().get_data();
             }
-            return this->addEntryPointEx(translationUnitIndex,name.utf8().get_data(),static_cast<SlangStage>(stage),genericArgCount,args);
+            auto result = this->addEntryPointEx(translationUnitIndex,name.utf8().get_data(),static_cast<SlangStage>(stage),genericArgCount,args);
+            delete[] args;
+            return result;
         }
         SlangResult _setGlobalGenericArgs(int genericArgCount,godot::TypedArray<godot::String>genericArgs){
-            const char* args[genericArgCount];
+            const char** args = new const char*[genericArgCount];
             for(int i = 0; i < genericArgCount; i++) {
                 args[i] = genericArgs[i].operator godot::String().utf8().get_data();
             }
-            return this->setGlobalGenericArgs(genericArgCount,args);
+            auto result = this->setGlobalGenericArgs(genericArgCount,args);
+            delete[] args;
+            return result;
         }
         SlangResult _setTypeNameForGlobalExistentialTypeParam(int typeParamIndex,godot::String typeName){
             return this->setTypeNameForGlobalExistentialTypeParam(typeParamIndex,typeName.utf8().get_data());
@@ -2421,9 +2427,9 @@ namespace slang_cpp {
         void _setIgnoreCapabilityCheck(bool value){
             return this->setIgnoreCapabilityCheck(value);
         }
-        SlangResult _getCompileTimeProfile(slang_IProfiler_PTR* outProfile,bool shouldClear){
-            return this->getCompileTimeProfile(reinterpret_cast<ISlangProfiler **>(&outProfile->value), shouldClear);
-        }
+        // SlangResult _getCompileTimeProfile(slang_IProfiler_PTR* outProfile,bool shouldClear){
+        //     return this->getCompileTimeProfile(reinterpret_cast<ISlangProfiler **>(&outProfile->value), shouldClear);
+        // }
         void _setTargetGenerateWholeProgram(int targetIndex, bool value){
             return this->setTargetGenerateWholeProgram(targetIndex, value);
         }
@@ -3564,8 +3570,8 @@ namespace slang_cpp {
         }
         slang_TypeReflection_HEAP_PTR * getType();
         slang_Modifier_HEAP_PTR* findModifier(slang::Modifier::ID id){
-            auto* a = new slang_Modifier(this->value->findModifier(id));
-            auto* ptr = new slang_Modifier_HEAP_PTR(a);
+            auto* a = memnew(slang_Modifier(this->value->findModifier(id)));
+            auto* ptr = memnew(slang_Modifier_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
@@ -3573,12 +3579,12 @@ namespace slang_cpp {
             return this->value->getUserAttributeCount();
         }
         slang_UserAttribute_HEAP_PTR* getUserAttributeByIndex(unsigned int index) {
-            auto* ptr = new slang_UserAttribute_HEAP_PTR(new slang_UserAttribute(this->value->getUserAttributeByIndex(index)));
+            auto* ptr = memnew(slang_UserAttribute_HEAP_PTR(memnew(slang_UserAttribute(this->value->getUserAttributeByIndex(index)))));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_UserAttribute_HEAP_PTR* findUserAttributeByName(slang_IGlobalSession* session,godot::String name) {
-            auto* ptr = new slang_UserAttribute_HEAP_PTR(new slang_UserAttribute(this->value->findUserAttributeByName(session,name.utf8().get_data())));
+            auto* ptr = memnew(slang_UserAttribute_HEAP_PTR(memnew(slang_UserAttribute(this->value->findUserAttributeByName(session,name.utf8().get_data())))));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
@@ -3638,8 +3644,8 @@ namespace slang_cpp {
 
     public:
         slang_VariableReflection_HEAP_PTR* getVariable() {
-            auto* a = new slang_VariableReflection(this->value->getVariable());
-            auto* ptr = new slang_VariableReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_VariableReflection(this->value->getVariable()));
+            auto* ptr = memnew(slang_VariableReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
@@ -3650,8 +3656,8 @@ namespace slang_cpp {
             return godot::String().utf8(a);
         }
         slang_Modifier_HEAP_PTR* findModifier(slang::Modifier::ID id){
-            auto* a = new slang_Modifier(this->value->findModifier(id));
-            auto* ptr = new slang_Modifier_HEAP_PTR(a);
+            auto* a = memnew(slang_Modifier(this->value->findModifier(id)));
+            auto* ptr = memnew(slang_Modifier_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
@@ -3747,8 +3753,8 @@ namespace slang_cpp {
             return this->value->getParameterCount();
         }
         slang_VariableReflection_HEAP_PTR* getParameterByIndex(unsigned int index) {
-            auto* a = new slang_VariableReflection(this->value->getParameterByIndex(index));
-            auto* ptr = new slang_VariableReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_VariableReflection(this->value->getParameterByIndex(index)));
+            auto* ptr = memnew(slang_VariableReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
@@ -3756,20 +3762,20 @@ namespace slang_cpp {
             return this->value->getUserAttributeCount();
         }
         slang_UserAttribute_HEAP_PTR* getUserAttributeByIndex(unsigned int index) {
-            auto* a = new slang_UserAttribute(this->value->getUserAttributeByIndex(index));
-            auto* ptr = new slang_UserAttribute_HEAP_PTR(a);
+            auto* a = memnew(slang_UserAttribute(this->value->getUserAttributeByIndex(index)));
+            auto* ptr = memnew(slang_UserAttribute_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_UserAttribute_HEAP_PTR* findUserAttributeByName(slang_IGlobalSession* session,godot::String name) {
-            auto* a = new slang_UserAttribute(this->value->findUserAttributeByName(session,name.utf8().get_data()));
-            auto* ptr = new slang_UserAttribute_HEAP_PTR(a);
+            auto* a = memnew(slang_UserAttribute(this->value->findUserAttributeByName(session,name.utf8().get_data())));
+            auto* ptr = memnew(slang_UserAttribute_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_Modifier_HEAP_PTR* findModifier(slang::Modifier::ID id){
-            auto* a = new slang_Modifier(this->value->findModifier(id));
-            auto* ptr = new slang_Modifier_HEAP_PTR(a);
+            auto* a = memnew(slang_Modifier(this->value->findModifier(id)));
+            auto* ptr = memnew(slang_Modifier_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
@@ -3839,28 +3845,28 @@ namespace slang_cpp {
             return this->value->getChildrenCount();
         }
         slang_DeclReflection_HEAP_PTR* getChild(unsigned int index) {
-            auto* a = new slang_DeclReflection(this->value->getChild(index));
-            auto* ptr = new slang_DeclReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_DeclReflection(this->value->getChild(index)));
+            auto* ptr = memnew(slang_DeclReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_TypeReflection_HEAP_PTR* getType();
         slang_VariableReflection_HEAP_PTR* asVariable() {
-            auto* a = new slang_VariableReflection(this->value->asVariable());
-            auto* ptr = new slang_VariableReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_VariableReflection(this->value->asVariable()));
+            auto* ptr = memnew(slang_VariableReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_FunctionReflection_HEAP_PTR* asFunction() {
-            auto* a = new slang_FunctionReflection(this->value->asFunction());
-            auto* ptr = new slang_FunctionReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_FunctionReflection(this->value->asFunction()));
+            auto* ptr = memnew(slang_FunctionReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_GenericReflection* asGeneric();
         slang_DeclReflection_HEAP_PTR* getParent() {
-            auto* a = new slang_DeclReflection(this->value->getParent());
-            auto* ptr = new slang_DeclReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_DeclReflection(this->value->getParent()));
+            auto* ptr = memnew(slang_DeclReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
@@ -4047,8 +4053,8 @@ namespace slang_cpp {
             return this->value->getFieldCount();
         }
         slang_VariableReflection_HEAP_PTR* getFieldByIndex(unsigned int index) {
-            auto* a = new slang_VariableReflection(this->value->getFieldByIndex(index));
-            auto* ptr = new slang_VariableReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_VariableReflection(this->value->getFieldByIndex(index)));
+            auto* ptr = memnew(slang_VariableReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
@@ -4056,8 +4062,8 @@ namespace slang_cpp {
             return this->value->isArray();
         }
         slang_TypeReflection_HEAP_PTR* unwrapArray(){
-            auto* a = new slang_TypeReflection(this->value->unwrapArray());
-            auto* ptr = new slang_TypeReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_TypeReflection(this->value->unwrapArray()));
+            auto* ptr = memnew(slang_TypeReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
@@ -4068,8 +4074,8 @@ namespace slang_cpp {
             return this->value->getTotalArrayElementCount();
         }
         slang_TypeReflection_HEAP_PTR* getElementType(){
-            auto* a = new slang_TypeReflection(this->value->getElementType());
-            auto* ptr = new slang_TypeReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_TypeReflection(this->value->getElementType()));
+            auto* ptr = memnew(slang_TypeReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
@@ -4086,8 +4092,8 @@ namespace slang_cpp {
         }
         slang_TypeReflection_HEAP_PTR* getResourceResultType()
         {
-            auto* a = new slang_TypeReflection(this->value->getResourceResultType());
-            auto* ptr = new slang_TypeReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_TypeReflection(this->value->getResourceResultType()));
+            auto* ptr = memnew(slang_TypeReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
@@ -4110,14 +4116,14 @@ namespace slang_cpp {
             return this->value->getUserAttributeCount();
         }
         slang_UserAttribute_HEAP_PTR* getUserAttributeByIndex(unsigned int index){
-            auto* a = new slang_UserAttribute(this->value->getUserAttributeByIndex(index));
-            auto* ptr = new slang_UserAttribute_HEAP_PTR(a);
+            auto* a = memnew(slang_UserAttribute(this->value->getUserAttributeByIndex(index)));
+            auto* ptr = memnew(slang_UserAttribute_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_UserAttribute_HEAP_PTR* findUserAttributeByName(godot::String name){
-            auto* a = new slang_UserAttribute(this->value->findUserAttributeByName(name.utf8().get_data()));
-            auto* ptr = new slang_UserAttribute_HEAP_PTR(a);
+            auto* a = memnew(slang_UserAttribute(this->value->findUserAttributeByName(name.utf8().get_data())));
+            auto* ptr = memnew(slang_UserAttribute_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
@@ -4212,8 +4218,8 @@ namespace slang_cpp {
 
     public:
         slang_TypeReflection_HEAP_PTR* getType(){
-            auto* a = new slang_TypeReflection(this->value->getType());
-            auto* ptr = new slang_TypeReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_TypeReflection(this->value->getType()));
+            auto* ptr = memnew(slang_TypeReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
@@ -4288,8 +4294,8 @@ namespace slang_cpp {
             return this->value->getConstraintCount();
         }
         slang_TypeReflection_HEAP_PTR* getConstraintByIndex(unsigned index){
-            auto* a = new slang_TypeReflection(this->value->getConstraintByIndex(index));
-            auto* ptr = new slang_TypeReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_TypeReflection(this->value->getConstraintByIndex(index)));
+            auto* ptr = memnew(slang_TypeReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
@@ -4376,14 +4382,14 @@ namespace slang_cpp {
             return this->value->getParameterCount();
         }
         slang_FunctionReflection_HEAP_PTR* getFunction() {
-            auto* a = new slang_FunctionReflection(this->value->getFunction());
-            auto* ptr = new slang_FunctionReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_FunctionReflection(this->value->getFunction()));
+            auto* ptr = memnew(slang_FunctionReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_VariableLayoutReflection_HEAP_PTR* getParameterByIndex(unsigned index){
-            auto* a = new slang_VariableLayoutReflection(this->value->getParameterByIndex(index));
-            auto* ptr = new slang_VariableLayoutReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_VariableLayoutReflection(this->value->getParameterByIndex(index)));
+            auto* ptr = memnew(slang_VariableLayoutReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
@@ -4409,20 +4415,20 @@ namespace slang_cpp {
             return this->value->usesAnySampleRateInput();
         }
         slang_VariableLayoutReflection_HEAP_PTR* getVarLayout(){
-            auto* a = new slang_VariableLayoutReflection(this->value->getVarLayout());
-            auto* ptr = new slang_VariableLayoutReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_VariableLayoutReflection(this->value->getVarLayout()));
+            auto* ptr = memnew(slang_VariableLayoutReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_TypeLayoutReflection_HEAP_PTR* getTypeLayout(){
-            auto* a = new slang_TypeLayoutReflection(this->value->getTypeLayout());
-            auto* ptr = new slang_TypeLayoutReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_TypeLayoutReflection(this->value->getTypeLayout()));
+            auto* ptr = memnew(slang_TypeLayoutReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_VariableLayoutReflection_HEAP_PTR* getResultVarLayout(){
-            auto* a = new slang_VariableLayoutReflection(this->value->getResultVarLayout());
-            auto* ptr = new slang_VariableLayoutReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_VariableLayoutReflection(this->value->getResultVarLayout()));
+            auto* ptr = memnew(slang_VariableLayoutReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
@@ -4497,26 +4503,26 @@ namespace slang_cpp {
             return static_cast<slang_ISession *>(this->value->getSession());
         }
         slang_TypeParameterReflection_HEAP_PTR* getTypeParameterByIndex(unsigned index) {
-            auto* a = new slang_TypeParameterReflection(this->value->getTypeParameterByIndex(index));
-            auto* ptr = new slang_TypeParameterReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_TypeParameterReflection(this->value->getTypeParameterByIndex(index)));
+            auto* ptr = memnew(slang_TypeParameterReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_TypeParameterReflection_HEAP_PTR* findTypeParameter(godot::String name) {
-            auto* a = new slang_TypeParameterReflection(this->value->findTypeParameter(name.utf8().get_data()));
-            auto* ptr = new slang_TypeParameterReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_TypeParameterReflection(this->value->findTypeParameter(name.utf8().get_data())));
+            auto* ptr = memnew(slang_TypeParameterReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_VariableLayoutReflection_HEAP_PTR* getParameterByIndex(unsigned index){
-            auto* a = new slang_VariableLayoutReflection(this->value->getParameterByIndex(index));
-            auto* ptr = new slang_VariableLayoutReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_VariableLayoutReflection(this->value->getParameterByIndex(index)));
+            auto* ptr = memnew(slang_VariableLayoutReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_ShaderReflection_HEAP_PTR* get(slang_ICompileRequest* request){
-            auto* a = new slang_ShaderReflection(this->value->get(request));
-            auto* ptr = new slang_ShaderReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_ShaderReflection(this->value->get(request)));
+            auto* ptr = memnew(slang_ShaderReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
@@ -4524,8 +4530,8 @@ namespace slang_cpp {
             return this->value->getEntryPointCount();
         }
         slang_EntryPointReflection_HEAP_PTR* getEntryPointIndex(SlangUInt index) {
-            auto* a = new slang_EntryPointReflection(this->value->getEntryPointByIndex(index));
-            auto* ptr = new slang_EntryPointReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_EntryPointReflection(this->value->getEntryPointByIndex(index)));
+            auto* ptr = memnew(slang_EntryPointReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
@@ -4536,53 +4542,54 @@ namespace slang_cpp {
             return this->value->getGlobalConstantBufferSize();
         }
         slang_TypeReflection_HEAP_PTR* findTypeByName(godot::String name){
-            auto* a = new slang_TypeReflection(this->value->findTypeByName(name.utf8().get_data()));
-            auto* ptr = new slang_TypeReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_TypeReflection(this->value->findTypeByName(name.utf8().get_data())));
+            auto* ptr = memnew(slang_TypeReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_FunctionReflection_HEAP_PTR* findFunctionByName(godot::String name) {
-            auto* a = new slang_FunctionReflection(this->value->findFunctionByName(name.utf8().get_data()));
-            auto* ptr = new slang_FunctionReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_FunctionReflection(this->value->findFunctionByName(name.utf8().get_data())));
+            auto* ptr = memnew(slang_FunctionReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_FunctionReflection_HEAP_PTR* findFunctionByNameInType(slang_TypeReflection* type, godot::String name) {
-            auto* a = new slang_FunctionReflection(this->value->findFunctionByNameInType(
-                    reinterpret_cast<slang::TypeReflection *>(&type->value), name.utf8().get_data()));
-            auto* ptr = new slang_FunctionReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_FunctionReflection(this->value->findFunctionByNameInType(
+                    reinterpret_cast<slang::TypeReflection *>(&type->value), name.utf8().get_data())));
+            auto* ptr = memnew(slang_FunctionReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_VariableReflection_HEAP_PTR* findVarByNameInType(slang_TypeReflection* type, godot::String name){
-            auto* a = new slang_VariableReflection(this->value->findVarByNameInType(
-                    reinterpret_cast<slang::TypeReflection *>(&type->value), name.utf8().get_data()));
-            auto* ptr = new slang_VariableReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_VariableReflection(this->value->findVarByNameInType(
+                    reinterpret_cast<slang::TypeReflection *>(&type->value), name.utf8().get_data())));
+            auto* ptr = memnew(slang_VariableReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_TypeLayoutReflection_HEAP_PTR* getTypeLayout(slang_TypeReflection* type,slang_LayoutRules rules = slang_LayoutRules::Default){
-            auto* a = new slang_TypeLayoutReflection(this->value->getTypeLayout(
+            auto* a = memnew(slang_TypeLayoutReflection(this->value->getTypeLayout(
                     reinterpret_cast<slang::TypeReflection *>(&type->value),
-                    static_cast<slang::LayoutRules>(rules)));
-            auto* ptr = new slang_TypeLayoutReflection_HEAP_PTR(a);
+                    static_cast<slang::LayoutRules>(rules))));
+            auto* ptr = memnew(slang_TypeLayoutReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_EntryPointReflection_HEAP_PTR* findEntryPointByName(godot::String name) {
-            auto* a = new slang_EntryPointReflection(this->value->findEntryPointByName(name.utf8().get_data()));
-            auto* ptr = new slang_EntryPointReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_EntryPointReflection(this->value->findEntryPointByName(name.utf8().get_data())));
+            auto* ptr = memnew(slang_EntryPointReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_TypeReflection_HEAP_PTR* specializeType(slang_TypeReflection* type, SlangInt specializationArgCount, slang_TypeReflection_VECTOR* specializationArgs,slang_IBlob_PTR* outDiagnostics){
-            slang_TypeReflection refs[specializationArgs->size()];
-            auto* a = new slang_TypeReflection(this->value->specializeType(
+            slang_TypeReflection** refs = memnew(slang_TypeReflection*[specializationArgs->size()]);
+            auto* a = memnew(slang_TypeReflection(this->value->specializeType(
                     reinterpret_cast<slang::TypeReflection *>(&type->value), specializationArgCount,
                     reinterpret_cast<slang::TypeReflection *const *>(refs),
-                    reinterpret_cast<ISlangBlob **>(&outDiagnostics->value)));
-            auto* ptr = new slang_TypeReflection_HEAP_PTR(a);
+                    reinterpret_cast<ISlangBlob **>(&outDiagnostics->value))));
+            auto* ptr = memnew(slang_TypeReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
+            delete[] refs;
             return ptr;
         }
         SlangUInt getHashedStringCount(){
@@ -4597,14 +4604,14 @@ namespace slang_cpp {
             return godot::String().utf8(str);
         }
         slang_TypeLayoutReflection_HEAP_PTR* getGlobalParamsTypeLayout(){
-            auto* a = new slang_TypeLayoutReflection(this->value->getGlobalParamsTypeLayout());
-            auto* ptr = new slang_TypeLayoutReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_TypeLayoutReflection(this->value->getGlobalParamsTypeLayout()));
+            auto* ptr = memnew(slang_TypeLayoutReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_VariableLayoutReflection_HEAP_PTR* getGlobalParamsVarLayout(){
-            auto* a = new slang_VariableLayoutReflection(this->value->getGlobalParamsVarLayout());
-            auto* ptr = new slang_VariableLayoutReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_VariableLayoutReflection(this->value->getGlobalParamsVarLayout()));
+            auto* ptr = memnew(slang_VariableLayoutReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
@@ -4661,8 +4668,8 @@ namespace slang_cpp {
 
     public:
         slang_TypeReflection_HEAP_PTR* getType(){
-            auto* a = new slang_TypeReflection(this->value->type);
-            auto* ptr = new slang_TypeReflection_HEAP_PTR(a);
+            auto* a = memnew(slang_TypeReflection(this->value->type));
+            auto* ptr = memnew(slang_TypeReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }

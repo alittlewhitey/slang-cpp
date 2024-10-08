@@ -120,10 +120,10 @@ namespace slang_cpp{
 
     SlangResult
     slang_ISession::_createTypeConformanceComponentType(slang_TypeReflection *type, slang_TypeReflection *interfaceType,
-                                                       slang_ITypeConformance_PTR*outConformance,
+                                                       slang_ITypeConformance*outConformance,
                                                        SlangInt conformanceIdOverride, slang_IBlob_PTR *outDiagnostics) {
         return this->createTypeConformanceComponentType(
-                type->value, interfaceType->value, reinterpret_cast<slang::ITypeConformance **>(&outConformance->value), conformanceIdOverride,
+                type->value, interfaceType->value, reinterpret_cast<slang::ITypeConformance **>(&outConformance), conformanceIdOverride,
                 reinterpret_cast<slang::IBlob **>(&outDiagnostics->value));
     }
 
@@ -155,9 +155,14 @@ namespace slang_cpp{
     SlangResult slang_ISession::_createCompositeComponentType(slang_IComponentType_VECTOR* componentTypes,
                                                              slang_IComponentType_PTR *outCompositeComponentType,
                                                              slang_IBlob_PTR *outDiagnostics) {
+        size_t size = componentTypes->size();
+        slang::IComponentType* types[size];
+        for(int i = 0;i!= size;++i){
+            types[i] =(*componentTypes)[i];
+        }
         return this->createCompositeComponentType(
-                reinterpret_cast<slang::IComponentType *const *>(componentTypes->data()),
-                componentTypes->size(),
+                types,
+                size,
                 reinterpret_cast<slang::IComponentType **>(&outCompositeComponentType->value),
                 reinterpret_cast<slang::IBlob **>(&outDiagnostics->value));
     }

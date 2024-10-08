@@ -1626,7 +1626,7 @@ namespace slang_cpp {
             return this->createCompileRequest(
                     reinterpret_cast<slang::ICompileRequest **>(&outCompileRequest->value));
         }
-        SlangResult _createTypeConformanceComponentType(slang_TypeReflection* type, slang_TypeReflection* interfaceType, slang_ITypeConformance_PTR* outConformance, SlangInt conformanceIdOverride, slang_IBlob_PTR* outDiagnostics);
+        SlangResult _createTypeConformanceComponentType(slang_TypeReflection* type, slang_TypeReflection* interfaceType, slang_ITypeConformance* outConformance, SlangInt conformanceIdOverride, slang_IBlob_PTR* outDiagnostics);
         slang_IModule *_loadModuleFromIRBlob(godot::String moduleName, godot::String path, slang_IBlob *source, slang_IBlob_PTR *outDiagnostics);
         SlangInt _getLoadedModuleCount() {
             return this->getLoadedModuleCount();
@@ -4549,21 +4549,21 @@ namespace slang_cpp {
         }
         slang_FunctionReflection_HEAP_PTR* findFunctionByNameInType(slang_TypeReflection* type, godot::String name) {
             auto* a = new slang_FunctionReflection(this->value->findFunctionByNameInType(
-                    reinterpret_cast<slang::TypeReflection *>(&type->value), name.utf8().get_data()));
+                    type->value, name.utf8().get_data()));
             auto* ptr = new slang_FunctionReflection_HEAP_PTR(a);
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_VariableReflection_HEAP_PTR* findVarByNameInType(slang_TypeReflection* type, godot::String name){
             auto* a = new slang_VariableReflection(this->value->findVarByNameInType(
-                    reinterpret_cast<slang::TypeReflection *>(&type->value), name.utf8().get_data()));
+                    type->value, name.utf8().get_data()));
             auto* ptr = new slang_VariableReflection_HEAP_PTR(a);
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_TypeLayoutReflection_HEAP_PTR* getTypeLayout(slang_TypeReflection* type,slang_LayoutRules rules = slang_LayoutRules::Default){
             auto* a = new slang_TypeLayoutReflection(this->value->getTypeLayout(
-                    reinterpret_cast<slang::TypeReflection *>(&type->value),
+                    type->value,
                     static_cast<slang::LayoutRules>(rules)));
             auto* ptr = new slang_TypeLayoutReflection_HEAP_PTR(a);
             ptr->set_shouldFreeData(true);
@@ -4575,12 +4575,18 @@ namespace slang_cpp {
             ptr->set_shouldFreeData(true);
             return ptr;
         }
-        slang_TypeReflection_HEAP_PTR* specializeType(slang_TypeReflection* type, SlangInt specializationArgCount, slang_TypeReflection_VECTOR* specializationArgs,slang_IBlob_PTR* outDiagnostics){
-            slang_TypeReflection refs[specializationArgs->size()];
+        slang_TypeReflection_HEAP_PTR* specializeType(slang_TypeReflection* type, SlangInt specializationArgCount, slang_TypeReflection_VECTOR* specializationArgs,slang_IBlob* outDiagnostics){
+            size_t size = specializationArgs->size();
+            slang::TypeReflection* refs[size];
+
+            for(int i = 0;i!=size;++i){
+                refs[i] = specializationArgs->at(i)->value;
+            }
+
             auto* a = new slang_TypeReflection(this->value->specializeType(
-                    reinterpret_cast<slang::TypeReflection *>(&type->value), specializationArgCount,
-                    reinterpret_cast<slang::TypeReflection *const *>(refs),
-                    reinterpret_cast<ISlangBlob **>(&outDiagnostics->value)));
+                    type->value, specializationArgCount,
+                    refs,
+                    reinterpret_cast<ISlangBlob **>(&outDiagnostics)));
             auto* ptr = new slang_TypeReflection_HEAP_PTR(a);
             ptr->set_shouldFreeData(true);
             return ptr;
@@ -4704,8 +4710,8 @@ namespace slang_cpp {
             single_ptr = nullptr;
         }
 
-        SlangResult createGlobalSession(slang_IGlobalSession_PTR* outGlobalSession){
-            return slang::createGlobalSession(reinterpret_cast<slang::IGlobalSession **>(&outGlobalSession->value));
+        SlangResult createGlobalSession(slang_IGlobalSession* outGlobalSession){
+            return slang::createGlobalSession(reinterpret_cast<slang::IGlobalSession **>(&outGlobalSession));
         }
         template<typename T>
         slang_IComponentType* shiftToComponent(T* ptr){

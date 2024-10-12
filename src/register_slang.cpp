@@ -10,12 +10,19 @@
 
 #define SLANG_BIND_CLASS(class)\
     GDREGISTER_CLASS(slang_cpp::slang_##class)        \
-    GDREGISTER_CLASS(slang_cpp::slang_##class##_PTR)\
+    GDREGISTER_CLASS(slang_cpp::slang_##class##_HEAP_PTR)\
     GDREGISTER_CLASS(slang_cpp::slang_##class##_VECTOR)
+#define SLANG_BIND_VALUE_CLASS(class) \
+    GDREGISTER_CLASS(slang_cpp::slang_##class##_VALUE_VECTOR)\
+    GDREGISTER_CLASS(slang_cpp::slang_##class##_VALUE_VECTOR_PTR)\
+    GDREGISTER_CLASS(slang_cpp::slang_##class##_VALUE_VECTOR_HEAP_PTR)
+
 #define SLANG_BIND_ABSTRACT_CLASS(class)\
     GDREGISTER_ABSTRACT_CLASS(slang_cpp::slang_##class)        \
-    GDREGISTER_CLASS(slang_cpp::slang_##class##_PTR)\
+    GDREGISTER_CLASS(slang_cpp::slang_##class##_HEAP_PTR)\
     GDREGISTER_CLASS(slang_cpp::slang_##class##_VECTOR)
+
+
 
 void initialize_slang_cpp_module(ModuleInitializationLevel p_level){
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
@@ -31,23 +38,23 @@ void initialize_slang_cpp_module(ModuleInitializationLevel p_level){
     SLANG_BIND_CLASS(SlangRef)
     GDREGISTER_CLASS(slang_cpp::slang_global)
     GDREGISTER_CLASS(slang_cpp::slang_VOID_PTR)
-    SLANG_BIND_ABSTRACT_CLASS(IUnknown)
-    SLANG_BIND_ABSTRACT_CLASS(IGlobalSession)
-    SLANG_BIND_ABSTRACT_CLASS(ISession)
-    SLANG_BIND_ABSTRACT_CLASS(IBlob)
-    SLANG_BIND_ABSTRACT_CLASS(ICastable)
-    SLANG_BIND_ABSTRACT_CLASS(IFileSystem)
-    SLANG_BIND_ABSTRACT_CLASS(IFileSystemExt)
-    SLANG_BIND_ABSTRACT_CLASS(IMutableFileSystem)
-    SLANG_BIND_ABSTRACT_CLASS(ISharedLibrary)
-    SLANG_BIND_ABSTRACT_CLASS(ISharedLibraryLoader)
-    SLANG_BIND_ABSTRACT_CLASS(IComponentType)
-    SLANG_BIND_ABSTRACT_CLASS(ITypeConformance)
-    SLANG_BIND_ABSTRACT_CLASS(IEntryPoint)
-    SLANG_BIND_ABSTRACT_CLASS(IModule)
-    SLANG_BIND_ABSTRACT_CLASS(IWriter)
-    SLANG_BIND_ABSTRACT_CLASS(IProfiler)
-    SLANG_BIND_ABSTRACT_CLASS(ICompileRequest)
+    SLANG_BIND_CLASS(IUnknown)
+    SLANG_BIND_CLASS(IGlobalSession)
+    SLANG_BIND_CLASS(ISession)
+    SLANG_BIND_CLASS(IBlob)
+    SLANG_BIND_CLASS(ICastable)
+    SLANG_BIND_CLASS(IFileSystem)
+    SLANG_BIND_CLASS(IFileSystemExt)
+    SLANG_BIND_CLASS(IMutableFileSystem)
+    SLANG_BIND_CLASS(ISharedLibrary)
+    SLANG_BIND_CLASS(ISharedLibraryLoader)
+    SLANG_BIND_CLASS(IComponentType)
+    SLANG_BIND_CLASS(ITypeConformance)
+    SLANG_BIND_CLASS(IEntryPoint)
+    SLANG_BIND_CLASS(IModule)
+    SLANG_BIND_CLASS(IWriter)
+    SLANG_BIND_CLASS(IProfiler)
+    SLANG_BIND_CLASS(ICompileRequest)
     SLANG_BIND_CLASS(UUID)
     SLANG_BIND_CLASS(CompilerOptionValue)
     SLANG_BIND_CLASS(CompilerOptionEntry)
@@ -68,14 +75,33 @@ void initialize_slang_cpp_module(ModuleInitializationLevel p_level){
     SLANG_BIND_CLASS(EntryPointReflection)
     SLANG_BIND_CLASS(ShaderReflection)
     SLANG_BIND_CLASS(SpecializationArg)
+    SLANG_BIND_VALUE_CLASS(UUID)
+    SLANG_BIND_VALUE_CLASS(CompilerOptionValue)
+    SLANG_BIND_VALUE_CLASS(CompilerOptionEntry)
+    SLANG_BIND_VALUE_CLASS(PreprocessorMacroDesc)
+    SLANG_BIND_VALUE_CLASS(TargetDesc)
+    SLANG_BIND_VALUE_CLASS(SessionDesc)
+    SLANG_BIND_VALUE_CLASS(Modifier)
+    SLANG_BIND_VALUE_CLASS(UserAttribute)
+    SLANG_BIND_VALUE_CLASS(FunctionReflection)
+    SLANG_BIND_VALUE_CLASS(DeclReflection)
+    SLANG_BIND_VALUE_CLASS(VariableReflection)
+    SLANG_BIND_VALUE_CLASS(VariableLayoutReflection)
+    SLANG_BIND_VALUE_CLASS(TypeReflection)
+    SLANG_BIND_VALUE_CLASS(TypeLayoutReflection)
+    SLANG_BIND_VALUE_CLASS(TypeParameterReflection)
+    SLANG_BIND_VALUE_CLASS(EntryPointReflection)
+    SLANG_BIND_VALUE_CLASS(ShaderReflection)
+    SLANG_BIND_VALUE_CLASS(SpecializationArg)
 
-    Engine::get_singleton()->register_singleton("slang_global",slang_cpp::slang_global::get_singleton());
+
+    //Engine::get_singleton()->register_singleton("slang_global",slang_cpp::slang_global::get_singleton());
 }
 void uninitialize_slang_cpp_module(ModuleInitializationLevel p_level){
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
-    Engine::get_singleton()->unregister_singleton("slang_global");
+    //Engine::get_singleton()->unregister_singleton("slang_global");
 }
 extern "C" {
 // Initialization.

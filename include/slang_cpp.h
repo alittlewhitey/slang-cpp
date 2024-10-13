@@ -1512,11 +1512,10 @@ namespace slang_cpp {
         }
     private:
         static void _bind_methods(){
-            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_IProfiler::has_value);
-            godot::ClassDB::bind_method(godot::D_METHOD("getEntryCount"), &slang_IProfiler::_getEntryCount);
-            godot::ClassDB::bind_method(godot::D_METHOD("getEntryName", "index"), &slang_IProfiler::_getEntryName);
-            godot::ClassDB::bind_method(godot::D_METHOD("getEntryTimeMS", "index"), &slang_IProfiler::_getEntryTimeMS);
-            godot::ClassDB::bind_method(godot::D_METHOD("getEntryInvocationTimes", "index"), &slang_IProfiler::_getEntryInvocationTimes);
+            // godot::ClassDB::bind_method(godot::D_METHOD("getEntryCount"), &slang_IProfiler::_getEntryCount);
+            // godot::ClassDB::bind_method(godot::D_METHOD("getEntryName", "index"), &slang_IProfiler::_getEntryName);
+            // godot::ClassDB::bind_method(godot::D_METHOD("getEntryTimeMS", "index"), &slang_IProfiler::_getEntryTimeMS);
+            // godot::ClassDB::bind_method(godot::D_METHOD("getEntryInvocationTimes", "index"), &slang_IProfiler::_getEntryInvocationTimes);
         }
     public:
         size_t _getEntryCount(){
@@ -1673,7 +1672,7 @@ namespace slang_cpp {
             godot::ClassDB::bind_method(godot::D_METHOD("setSkipSPIRVValidation","value"),&slang_ICompileRequest::_setSkipSPIRVValidation);
             godot::ClassDB::bind_method(godot::D_METHOD("setTargetUseMinimumSlangOptimization","targetIndex","value"),&slang_ICompileRequest::_setTargetUseMinimumSlangOptimization);
             godot::ClassDB::bind_method(godot::D_METHOD("setIgnoreCapabilityCheck","value"),&slang_ICompileRequest::_setIgnoreCapabilityCheck);
-            godot::ClassDB::bind_method(godot::D_METHOD("getCompileTimeProfile","compileTimeProfile","shouldClear"),&slang_ICompileRequest::_getCompileTimeProfile);
+            // godot::ClassDB::bind_method(godot::D_METHOD("getCompileTimeProfile","compileTimeProfile","shouldClear"),&slang_ICompileRequest::_getCompileTimeProfile, &slang_ICompileRequest::getCompileTimeProfile);
             godot::ClassDB::bind_method(godot::D_METHOD("setTargetGenerateWholeProgram","targetIndex","value"),&slang_ICompileRequest::_setTargetGenerateWholeProgram);
             godot::ClassDB::bind_method(godot::D_METHOD("setTargetEmbedDXIL","targetIndex","value"),&slang_ICompileRequest::_setTargetEmbedDXIL);
         }

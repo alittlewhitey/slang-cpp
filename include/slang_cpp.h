@@ -10,634 +10,48 @@
 #include <godot_cpp/classes/object.hpp>
 #include <godot_cpp/classes/ref.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
-namespace slang_cpp{
-    enum slang_CompilerOptionValueKind{
-        Int,String
-    };
-
-    enum slang_CompilerOptionName{
-        MacroDefine,        // stringValue0: macro name;  stringValue1: macro value
-        DepFile,
-        EntryPointName,
-        Specialize,
-        Help,
-        HelpStyle,
-        Include,            // stringValue: additional include path.
-        Language,
-        MatrixLayoutColumn, // bool
-        MatrixLayoutRow,    // bool
-        ZeroInitialize,     // bool
-        IgnoreCapabilities, // bool
-        RestrictiveCapabilityCheck, // bool
-        ModuleName,         // stringValue0: module name.
-        Output,
-        Profile,            // intValue0: profile
-        Stage,              // intValue0: stage
-        Target,             // intValue0: CodeGenTarget
-        Version,
-        WarningsAsErrors,   // stringValue0: "all" or comma separated list of warning codes or names.
-        DisableWarnings,    // stringValue0: comma separated list of warning codes or names.
-        EnableWarning,      // stringValue0: warning code or name.
-        DisableWarning,     // stringValue0: warning code or name.
-        DumpWarningDiagnostics,
-        InputFilesRemain,
-        EmitIr,                // bool
-        ReportDownstreamTime,  // bool
-        ReportPerfBenchmark,   // bool
-        SkipSPIRVValidation,   // bool
-        SourceEmbedStyle,
-        SourceEmbedName,
-        SourceEmbedLanguage,
-        DisableShortCircuit,   // bool
-        MinimumSlangOptimization, // bool
-        DisableNonEssentialValidations, // bool
-        DisableSourceMap,       // bool
-        UnscopedEnum,           // bool
-        PreserveParameters,       // bool: preserve all resource parameters in the output code.
-
-        // Target
-
-        Capability,                 // intValue0: CapabilityName
-        DefaultImageFormatUnknown,  // bool
-        DisableDynamicDispatch,     // bool
-        DisableSpecialization,      // bool
-        FloatingPointMode,          // intValue0: FloatingPointMode
-        DebugInformation,           // intValue0: DebugInfoLevel
-        LineDirectiveMode,
-        Optimization,               // intValue0: OptimizationLevel
-        Obfuscate,                  // bool
-
-        VulkanBindShift,            // intValue0 (higher 8 bits): kind; intValue0(lower bits): set; intValue1: shift
-        VulkanBindGlobals,          // intValue0: index; intValue1: set
-        VulkanInvertY,              // bool
-        VulkanUseDxPositionW,       // bool
-        VulkanUseEntryPointName,    // bool
-        VulkanUseGLLayout,          // bool
-        VulkanEmitReflection,       // bool
-
-        GLSLForceScalarLayout,      // bool
-        EnableEffectAnnotations,    // bool
-
-        EmitSpirvViaGLSL,           // bool
-        EmitSpirvDirectly,          // bool
-        SPIRVCoreGrammarJSON,       // stringValue0: json path
-        IncompleteLibrary,          // bool, when set, will not issue an error when the linked program has unresolved extern function symbols.
-
-        // Downstream
-
-        CompilerPath,
-        DefaultDownstreamCompiler,
-        DownstreamArgs,             // stringValue0: downstream compiler name. stringValue1: argument list, one per line.
-        PassThrough,
-
-        // Repro
-
-        DumpRepro,
-        DumpReproOnError,
-        ExtractRepro,
-        LoadRepro,
-        LoadReproDirectory,
-        ReproFallbackDirectory,
-
-        // Debugging
-
-        DumpAst,
-        DumpIntermediatePrefix,
-        DumpIntermediates,      // bool
-        DumpIr,                 // bool
-        DumpIrIds,
-        PreprocessorOutput,
-        OutputIncludes,
-        ReproFileSystem,
-        SerialIr,               // bool
-        SkipCodeGen,            // bool
-        ValidateIr,             // bool
-        VerbosePaths,
-        VerifyDebugSerialIr,
-        NoCodeGen,              // Not used.
-
-        // Experimental
-
-        FileSystem,
-        Heterogeneous,
-        NoMangle,
-        NoHLSLBinding,
-        NoHLSLPackConstantBufferElements,
-        ValidateUniformity,
-        AllowGLSL,
-        EnableExperimentalPasses,
-
-        // Internal
-
-        ArchiveType,
-        CompileStdLib,
-        Doc,
-        IrCompression,
-        LoadStdLib,
-        ReferenceModule,
-        SaveStdLib,
-        SaveStdLibBinSource,
-        TrackLiveness,
-        LoopInversion,              // bool, enable loop inversion optimization
-
-        // Deprecated
-        ParameterBlocksUseRegisterSpaces,
-
-        CountOfParsableOptions,
-
-        // Used in parsed options only.
-        DebugInformationFormat,     // intValue0: DebugInfoFormat
-        VulkanBindShiftAll,         // intValue0: kind; intValue1: shift
-        GenerateWholeProgram,       // bool
-        UseUpToDateBinaryModule,    // bool, when set, will only load
-        // precompiled modules if it is up-to-date with its source.
-
-        EmbedDXIL,                  // bool
-        CountOf,
-    };
-    enum slang_SlangCompileTarget : SlangCompileTargetIntegral
-    {
-        SLANG_TARGET_UNKNOWN,
-        SLANG_TARGET_NONE,
-        SLANG_GLSL,
-        SLANG_GLSL_VULKAN_DEPRECATED,              //< deprecated and removed: just use `SLANG_GLSL`.
-        SLANG_GLSL_VULKAN_ONE_DESC_DEPRECATED,     //< deprecated and removed.
-        SLANG_HLSL,
-        SLANG_SPIRV,
-        SLANG_SPIRV_ASM,
-        SLANG_DXBC,
-        SLANG_DXBC_ASM,
-        SLANG_DXIL,
-        SLANG_DXIL_ASM,
-        SLANG_C_SOURCE,                 ///< The C language
-        SLANG_CPP_SOURCE,               ///< C++ code for shader kernels.
-        SLANG_HOST_EXECUTABLE,          ///< Standalone binary executable (for hosting CPU/OS)
-        SLANG_SHADER_SHARED_LIBRARY,    ///< A shared library/Dll for shader kernels (for hosting CPU/OS)
-        SLANG_SHADER_HOST_CALLABLE,     ///< A CPU target that makes the compiled shader code available to be run immediately
-        SLANG_CUDA_SOURCE,              ///< Cuda source
-        SLANG_PTX,                      ///< PTX
-        SLANG_CUDA_OBJECT_CODE,         ///< Object code that contains CUDA functions.
-        SLANG_OBJECT_CODE,              ///< Object code that can be used for later linking
-        SLANG_HOST_CPP_SOURCE,          ///< C++ code for host library or executable.
-        SLANG_HOST_HOST_CALLABLE,       ///< Host callable host code (ie non kernel/shader)
-        SLANG_CPP_PYTORCH_BINDING,      ///< C++ PyTorch binding code.
-        SLANG_METAL,                    ///< Metal shading language
-        SLANG_METAL_LIB,                ///< Metal library
-        SLANG_METAL_LIB_ASM,            ///< Metal library assembly
-        SLANG_HOST_SHARED_LIBRARY,      ///< A shared library/Dll for host code (for hosting CPU/OS)
-        SLANG_TARGET_COUNT_OF,
-    };
-    enum slang_SlangProfileID : SlangProfileIDIntegral
-    {
-        SLANG_PROFILE_UNKNOWN,
-    };
-    enum slang_SlangFloatingPointMode : SlangFloatingPointModeIntegral
-    {
-        SLANG_FLOATING_POINT_MODE_DEFAULT = 0,
-        SLANG_FLOATING_POINT_MODE_FAST,
-        SLANG_FLOATING_POINT_MODE_PRECISE,
-    };
-    enum slang_SlangLineDirectiveMode : SlangLineDirectiveModeIntegral
-    {
-        SLANG_LINE_DIRECTIVE_MODE_DEFAULT = 0,  /**< Default behavior: pick behavior base on target. */
-        SLANG_LINE_DIRECTIVE_MODE_NONE,         /**< Don't emit line directives at all. */
-        SLANG_LINE_DIRECTIVE_MODE_STANDARD,     /**< Emit standard C-style `#line` directives. */
-        SLANG_LINE_DIRECTIVE_MODE_GLSL,         /**< Emit GLSL-style directives with file *number* instead of name */
-        SLANG_LINE_DIRECTIVE_MODE_SOURCE_MAP,   /**< Use a source map to track line mappings (ie no #line will appear in emitting source) */
-    };
-    enum slang_SlangMatrixLayoutMode : SlangMatrixLayoutModeIntegral
-    {
-        SLANG_MATRIX_LAYOUT_MODE_UNKNOWN = 0,
-        SLANG_MATRIX_LAYOUT_ROW_MAJOR,
-        SLANG_MATRIX_LAYOUT_COLUMN_MAJOR,
-    };
-    enum slang_SlangPassThrough : SlangPassThroughIntegral
-    {
-        SLANG_PASS_THROUGH_NONE,
-        SLANG_PASS_THROUGH_FXC,
-        SLANG_PASS_THROUGH_DXC,
-        SLANG_PASS_THROUGH_GLSLANG,
-        SLANG_PASS_THROUGH_SPIRV_DIS,
-        SLANG_PASS_THROUGH_CLANG,                   ///< Clang C/C++ compiler
-        SLANG_PASS_THROUGH_VISUAL_STUDIO,           ///< Visual studio C/C++ compiler
-        SLANG_PASS_THROUGH_GCC,                     ///< GCC C/C++ compiler
-        SLANG_PASS_THROUGH_GENERIC_C_CPP,           ///< Generic C or C++ compiler, which is decided by the source type
-        SLANG_PASS_THROUGH_NVRTC,                   ///< NVRTC Cuda compiler
-        SLANG_PASS_THROUGH_LLVM,                    ///< LLVM 'compiler' - includes LLVM and Clang
-        SLANG_PASS_THROUGH_SPIRV_OPT,               ///< SPIRV-opt
-        SLANG_PASS_THROUGH_METAL,                   ///< Metal compiler
-        SLANG_PASS_THROUGH_COUNT_OF,
-    };
-    enum slang_SlangCapabilityID : SlangCapabilityIDIntegral
-    {
-        SLANG_CAPABILITY_UNKNOWN = 0,
-    };
-    enum slang_SlangResourceShape : SlangResourceShapeIntegral
-    {
-        SLANG_RESOURCE_BASE_SHAPE_MASK      = 0x0F,
-
-        SLANG_RESOURCE_NONE                 = 0x00,
-
-        SLANG_TEXTURE_1D                    = 0x01,
-        SLANG_TEXTURE_2D                    = 0x02,
-        SLANG_TEXTURE_3D                    = 0x03,
-        SLANG_TEXTURE_CUBE                  = 0x04,
-        SLANG_TEXTURE_BUFFER                = 0x05,
-
-        SLANG_STRUCTURED_BUFFER             = 0x06,
-        SLANG_BYTE_ADDRESS_BUFFER           = 0x07,
-        SLANG_RESOURCE_UNKNOWN              = 0x08,
-        SLANG_ACCELERATION_STRUCTURE        = 0x09,
-        SLANG_TEXTURE_SUBPASS               = 0x0A,
-
-        SLANG_RESOURCE_EXT_SHAPE_MASK       = 0xF0,
-
-        SLANG_TEXTURE_FEEDBACK_FLAG         = 0x10,
-        SLANG_TEXTURE_SHADOW_FLAG           = 0x20,
-        SLANG_TEXTURE_ARRAY_FLAG            = 0x40,
-        SLANG_TEXTURE_MULTISAMPLE_FLAG      = 0x80,
-
-        SLANG_TEXTURE_1D_ARRAY              = SLANG_TEXTURE_1D   | SLANG_TEXTURE_ARRAY_FLAG,
-        SLANG_TEXTURE_2D_ARRAY              = SLANG_TEXTURE_2D   | SLANG_TEXTURE_ARRAY_FLAG,
-        SLANG_TEXTURE_CUBE_ARRAY            = SLANG_TEXTURE_CUBE | SLANG_TEXTURE_ARRAY_FLAG,
-
-        SLANG_TEXTURE_2D_MULTISAMPLE        = SLANG_TEXTURE_2D | SLANG_TEXTURE_MULTISAMPLE_FLAG,
-        SLANG_TEXTURE_2D_MULTISAMPLE_ARRAY  = SLANG_TEXTURE_2D | SLANG_TEXTURE_MULTISAMPLE_FLAG | SLANG_TEXTURE_ARRAY_FLAG,
-        SLANG_TEXTURE_SUBPASS_MULTISAMPLE   = SLANG_TEXTURE_SUBPASS | SLANG_TEXTURE_MULTISAMPLE_FLAG,
-    };
-    enum slang_SlangResourceAccess : SlangResourceAccessIntegral
-    {
-        SLANG_RESOURCE_ACCESS_NONE,
-        SLANG_RESOURCE_ACCESS_READ,
-        SLANG_RESOURCE_ACCESS_READ_WRITE,
-        SLANG_RESOURCE_ACCESS_RASTER_ORDERED,
-        SLANG_RESOURCE_ACCESS_APPEND,
-        SLANG_RESOURCE_ACCESS_CONSUME,
-        SLANG_RESOURCE_ACCESS_WRITE,
-        SLANG_RESOURCE_ACCESS_FEEDBACK,
-        SLANG_RESOURCE_ACCESS_UNKNOWN = 0x7FFFFFFF,
-    };
-    enum slang_SlangParameterCategory : SlangParameterCategoryIntegral
-    {
-        SLANG_PARAMETER_CATEGORY_NONE,
-        SLANG_PARAMETER_CATEGORY_MIXED,
-        SLANG_PARAMETER_CATEGORY_CONSTANT_BUFFER,
-        SLANG_PARAMETER_CATEGORY_SHADER_RESOURCE,
-        SLANG_PARAMETER_CATEGORY_UNORDERED_ACCESS,
-        SLANG_PARAMETER_CATEGORY_VARYING_INPUT,
-        SLANG_PARAMETER_CATEGORY_VARYING_OUTPUT,
-        SLANG_PARAMETER_CATEGORY_SAMPLER_STATE,
-        SLANG_PARAMETER_CATEGORY_UNIFORM,
-        SLANG_PARAMETER_CATEGORY_DESCRIPTOR_TABLE_SLOT,
-        SLANG_PARAMETER_CATEGORY_SPECIALIZATION_CONSTANT,
-        SLANG_PARAMETER_CATEGORY_PUSH_CONSTANT_BUFFER,
-
-        // HLSL register `space`, Vulkan GLSL `set`
-        SLANG_PARAMETER_CATEGORY_REGISTER_SPACE,
-
-        // TODO: Ellie, Both APIs treat mesh outputs as more or less varying output,
-        // Does it deserve to be represented here??
-
-        // A parameter whose type is to be specialized by a global generic type argument
-        SLANG_PARAMETER_CATEGORY_GENERIC,
-
-        SLANG_PARAMETER_CATEGORY_RAY_PAYLOAD,
-        SLANG_PARAMETER_CATEGORY_HIT_ATTRIBUTES,
-        SLANG_PARAMETER_CATEGORY_CALLABLE_PAYLOAD,
-        SLANG_PARAMETER_CATEGORY_SHADER_RECORD,
-
-        // An existential type parameter represents a "hole" that
-        // needs to be filled with a concrete type to enable
-        // generation of specialized code.
-        //
-        // Consider this example:
-        //
-        //      struct MyParams
-        //      {
-        //          IMaterial material;
-        //          ILight lights[3];
-        //      };
-        //
-        // This `MyParams` type introduces two existential type parameters:
-        // one for `material` and one for `lights`. Even though `lights`
-        // is an array, it only introduces one type parameter, because
-        // we need to hae a *single* concrete type for all the array
-        // elements to be able to generate specialized code.
-        //
-        SLANG_PARAMETER_CATEGORY_EXISTENTIAL_TYPE_PARAM,
-
-        // An existential object parameter represents a value
-        // that needs to be passed in to provide data for some
-        // interface-type shader paameter.
-        //
-        // Consider this example:
-        //
-        //      struct MyParams
-        //      {
-        //          IMaterial material;
-        //          ILight lights[3];
-        //      };
-        //
-        // This `MyParams` type introduces four existential object parameters:
-        // one for `material` and three for `lights` (one for each array
-        // element). This is consistent with the number of interface-type
-        // "objects" that are being passed through to the shader.
-        //
-        SLANG_PARAMETER_CATEGORY_EXISTENTIAL_OBJECT_PARAM,
-
-        // The register space offset for the sub-elements that occupies register spaces.
-        SLANG_PARAMETER_CATEGORY_SUB_ELEMENT_REGISTER_SPACE,
-
-        // The input_attachment_index subpass occupancy tracker
-        SLANG_PARAMETER_CATEGORY_SUBPASS,
-
-        // Metal tier-1 argument buffer element [[id]].
-        SLANG_PARAMETER_CATEGORY_METAL_ARGUMENT_BUFFER_ELEMENT,
-
-        // Metal [[attribute]] inputs.
-        SLANG_PARAMETER_CATEGORY_METAL_ATTRIBUTE,
-
-        // Metal [[payload]] inputs
-        SLANG_PARAMETER_CATEGORY_METAL_PAYLOAD,
-
-        //
-        SLANG_PARAMETER_CATEGORY_COUNT,
-
-        // Aliases for Metal-specific categories.
-        SLANG_PARAMETER_CATEGORY_METAL_BUFFER = SLANG_PARAMETER_CATEGORY_CONSTANT_BUFFER,
-        SLANG_PARAMETER_CATEGORY_METAL_TEXTURE = SLANG_PARAMETER_CATEGORY_SHADER_RESOURCE,
-        SLANG_PARAMETER_CATEGORY_METAL_SAMPLER = SLANG_PARAMETER_CATEGORY_SAMPLER_STATE,
-
-        // DEPRECATED:
-        SLANG_PARAMETER_CATEGORY_VERTEX_INPUT = SLANG_PARAMETER_CATEGORY_VARYING_INPUT,
-        SLANG_PARAMETER_CATEGORY_FRAGMENT_OUTPUT = SLANG_PARAMETER_CATEGORY_VARYING_OUTPUT,
-        SLANG_PARAMETER_CATEGORY_COUNT_V1 = SLANG_PARAMETER_CATEGORY_SUBPASS,
-    };
-    enum slang_LayoutRules : SlangLayoutRulesIntegral
-    {
-        Default = SLANG_LAYOUT_RULES_DEFAULT,
-        MetalArgumentBufferTier2 = SLANG_LAYOUT_RULES_METAL_ARGUMENT_BUFFER_TIER_2,
-    };
-    enum slang_ContainerType
-    {
-        None, UnsizedArray, StructuredBuffer, ConstantBuffer, ParameterBlock
-    };
-    enum slang_SlangPathType : SlangPathTypeIntegral
-    {
-        SLANG_PATH_TYPE_DIRECTORY,      /**< Path specified specifies a directory. */
-        SLANG_PATH_TYPE_FILE,           /**< Path specified is to a file. */
-    };
-    enum slang_PathKind
-    {
-        /// Given a path, returns a simplified version of that path.
-        /// This typically means removing '..' and/or '.' from the path.
-        /// A simplified path must point to the same object as the original.
-        Simplified,
-
-        /// Given a path, returns a 'canonical path' to the item.
-        /// This may be the operating system 'canonical path' that is the unique path to the item.
-        ///
-        /// If the item exists the returned canonical path should always be usable to access the item.
-        ///
-        /// If the item the path specifies doesn't exist, the canonical path may not be returnable
-        /// or be a path simplification.
-        /// Not all file systems support canonical paths.
-        Canonical,
-
-        /// Given a path returns a path such that it is suitable to be displayed to the user.
-        ///
-        /// For example if the file system is a zip file - it might include the path to the zip
-        /// container as well as the path to the specific file.
-        ///
-        /// NOTE! The display path won't necessarily work on the file system to access the item
-        Display,
-
-        /// Get the path to the item on the *operating system* file system, if available.
-        OperatingSystem,
-
-        CountOf_
-    };
-    enum slang_OSPathKind : uint8_t
-    {
-        None_,                ///< Paths do not map to the file system
-        Direct,              ///< Paths map directly to the file system
-        OperatingSystem_,     ///< Only paths gained via PathKind::OperatingSystem map to the operating system file system
-    };
-    enum slang_SlangStage : SlangStageIntegral
-    {
-        SLANG_STAGE_NONE,
-        SLANG_STAGE_VERTEX,
-        SLANG_STAGE_HULL,
-        SLANG_STAGE_DOMAIN,
-        SLANG_STAGE_GEOMETRY,
-        SLANG_STAGE_FRAGMENT,
-        SLANG_STAGE_COMPUTE,
-        SLANG_STAGE_RAY_GENERATION,
-        SLANG_STAGE_INTERSECTION,
-        SLANG_STAGE_ANY_HIT,
-        SLANG_STAGE_CLOSEST_HIT,
-        SLANG_STAGE_MISS,
-        SLANG_STAGE_CALLABLE,
-        SLANG_STAGE_MESH,
-        SLANG_STAGE_AMPLIFICATION,
-
-        // alias:
-        SLANG_STAGE_PIXEL = SLANG_STAGE_FRAGMENT,
-    };
-    enum slang_SlangCompileFlags{
-        /* Do as little mangling of names as possible, to try to preserve original names */
-        SLANG_COMPILE_FLAG_NO_MANGLING          = 1 << 3,
-
-        /* Skip code generation step, just check the code and generate layout */
-        SLANG_COMPILE_FLAG_NO_CODEGEN           = 1 << 4,
-
-        /* Obfuscate shader names on release products */
-        SLANG_COMPILE_FLAG_OBFUSCATE = 1 << 5,
-
-        /* Deprecated flags: kept around to allow existing applications to
-        compile. Note that the relevant features will still be left in
-        their default state. */
-        SLANG_COMPILE_FLAG_NO_CHECKING          = 0,
-        SLANG_COMPILE_FLAG_SPLIT_MIXED_TYPES    = 0,
-    };
-    enum slang_SlangTargetFlags
-    {
-        /* When compiling for a D3D Shader Model 5.1 or higher target, allocate
-           distinct register spaces for parameter blocks.
-
-           @deprecated This behavior is now enabled unconditionally.
-        */
-        SLANG_TARGET_FLAG_PARAMETER_BLOCKS_USE_REGISTER_SPACES = 1 << 4,
-
-        /* When set, will generate target code that contains all entrypoints defined
-           in the input source or specified via the `spAddEntryPoint` function in a
-           single output module (library/source file).
-        */
-        SLANG_TARGET_FLAG_GENERATE_WHOLE_PROGRAM = 1 << 8,
-
-        /* When set, will dump out the IR between intermediate compilation steps.*/
-        SLANG_TARGET_FLAG_DUMP_IR = 1 << 9,
-
-        /* When set, will generate SPIRV directly rather than via glslang. */
-        SLANG_TARGET_FLAG_GENERATE_SPIRV_DIRECTLY = 1 << 10,
-    };
-    enum slang_SlangDebugInfoLevel : SlangDebugInfoLevelIntegral
-    {
-        SLANG_DEBUG_INFO_LEVEL_NONE = 0,    /**< Don't emit debug information at all. */
-        SLANG_DEBUG_INFO_LEVEL_MINIMAL,     /**< Emit as little debug information as possible, while still supporting stack trackes. */
-        SLANG_DEBUG_INFO_LEVEL_STANDARD,    /**< Emit whatever is the standard level of debug information for each target. */
-        SLANG_DEBUG_INFO_LEVEL_MAXIMAL,     /**< Emit as much debug infromation as possible for each target. */
-    };
-    enum slang_SlangOptimizationLevel : SlangOptimizationLevelIntegral
-    {
-        SLANG_OPTIMIZATION_LEVEL_NONE = 0,  /**< Don't optimize at all. */
-        SLANG_OPTIMIZATION_LEVEL_DEFAULT,   /**< Default optimization level: balance code quality and compilation time. */
-        SLANG_OPTIMIZATION_LEVEL_HIGH,      /**< Optimize aggressively. */
-        SLANG_OPTIMIZATION_LEVEL_MAXIMAL,   /**< Include optimizations that may take a very long time, or may involve severe space-vs-speed tradeoffs */
-    };
-    enum slang_SlangContainerFormat : SlangContainerFormatIntegral
-    {
-        /* Don't generate a container. */
-        SLANG_CONTAINER_FORMAT_NONE,
-
-        /* Generate a container in the `.slang-module` format,
-        which includes reflection information, compiled kernels, etc. */
-        SLANG_CONTAINER_FORMAT_SLANG_MODULE,
-    };
-    enum slang_SlangWriterChannel : SlangWriterChannelIntegral
-    {
-        SLANG_WRITER_CHANNEL_DIAGNOSTIC,
-        SLANG_WRITER_CHANNEL_STD_OUTPUT,
-        SLANG_WRITER_CHANNEL_STD_ERROR,
-        SLANG_WRITER_CHANNEL_COUNT_OF,
-    };
-    enum slang_SlangWriterMode : SlangWriterModeIntegral
-    {
-        SLANG_WRITER_MODE_TEXT,
-        SLANG_WRITER_MODE_BINARY,
-    };
-    enum slang_SlangSourceLanguage : SlangSourceLanguageIntegral
-    {
-        SLANG_SOURCE_LANGUAGE_UNKNOWN,
-        SLANG_SOURCE_LANGUAGE_SLANG,
-        SLANG_SOURCE_LANGUAGE_HLSL,
-        SLANG_SOURCE_LANGUAGE_GLSL,
-        SLANG_SOURCE_LANGUAGE_C,
-        SLANG_SOURCE_LANGUAGE_CPP,
-        SLANG_SOURCE_LANGUAGE_CUDA,
-        SLANG_SOURCE_LANGUAGE_SPIRV,
-        SLANG_SOURCE_LANGUAGE_METAL,
-        SLANG_SOURCE_LANGUAGE_COUNT_OF,
-    };
-    enum slang_SlangSeverity : SlangSeverityIntegral
-    {
-        SLANG_SEVERITY_DISABLED = 0, /**< A message that is disabled, filtered out. */
-        SLANG_SEVERITY_NOTE,         /**< An informative message. */
-        SLANG_SEVERITY_WARNING,      /**< A warning, which indicates a possible proble. */
-        SLANG_SEVERITY_ERROR,        /**< An error, indicating that compilation failed. */
-        SLANG_SEVERITY_FATAL,        /**< An unrecoverable error, which forced compilation to abort. */
-        SLANG_SEVERITY_INTERNAL,     /**< An internal error, indicating a logic error in the compiler. */
-    };
-    enum slang_SlangDebugInfoFormat : SlangDebugInfoFormatIntegral
-    {
-        SLANG_DEBUG_INFO_FORMAT_DEFAULT,         ///< Use the default debugging format for the target
-        SLANG_DEBUG_INFO_FORMAT_C7,              ///< CodeView C7 format (typically means debugging infomation is embedded in the binary)
-        SLANG_DEBUG_INFO_FORMAT_PDB,             ///< Program database
-
-        SLANG_DEBUG_INFO_FORMAT_STABS,          ///< Stabs
-        SLANG_DEBUG_INFO_FORMAT_COFF,           ///< COFF debug info
-        SLANG_DEBUG_INFO_FORMAT_DWARF,          ///< DWARF debug info (we may want to support specifying the version)
-
-        SLANG_DEBUG_INFO_FORMAT_COUNT_OF,
-    };
-}
-VARIANT_ENUM_CAST(slang_cpp::slang_CompilerOptionValueKind)
-VARIANT_ENUM_CAST(slang_cpp::slang_CompilerOptionName)
-VARIANT_ENUM_CAST(slang_cpp::slang_SlangCompileTarget)
-VARIANT_ENUM_CAST(slang_cpp::slang_SlangProfileID)
-VARIANT_ENUM_CAST(slang_cpp::slang_SlangFloatingPointMode)
-VARIANT_ENUM_CAST(slang_cpp::slang_SlangLineDirectiveMode)
-VARIANT_ENUM_CAST(slang_cpp::slang_SlangMatrixLayoutMode)
-VARIANT_ENUM_CAST(slang_cpp::slang_SlangPassThrough)
-VARIANT_ENUM_CAST(slang_cpp::slang_SlangCapabilityID)
-VARIANT_ENUM_CAST(slang_cpp::slang_SlangResourceShape)
-VARIANT_ENUM_CAST(slang_cpp::slang_SlangResourceAccess)
-VARIANT_ENUM_CAST(slang_cpp::slang_SlangParameterCategory)
-VARIANT_ENUM_CAST(slang_cpp::slang_LayoutRules)
-VARIANT_ENUM_CAST(slang_cpp::slang_ContainerType)
-VARIANT_ENUM_CAST(slang_cpp::slang_SlangPathType)
-VARIANT_ENUM_CAST(slang_cpp::slang_PathKind)
-VARIANT_ENUM_CAST(slang_cpp::slang_OSPathKind)
-VARIANT_ENUM_CAST(slang_cpp::slang_SlangStage)
-VARIANT_ENUM_CAST(slang_cpp::slang_SlangCompileFlags)
-VARIANT_ENUM_CAST(slang_cpp::slang_SlangTargetFlags)
-VARIANT_ENUM_CAST(slang_cpp::slang_SlangDebugInfoLevel)
-VARIANT_ENUM_CAST(slang_cpp::slang_SlangOptimizationLevel)
-VARIANT_ENUM_CAST(slang_cpp::slang_SlangContainerFormat)
-VARIANT_ENUM_CAST(slang_cpp::slang_SlangWriterChannel)
-VARIANT_ENUM_CAST(slang_cpp::slang_SlangWriterMode)
-VARIANT_ENUM_CAST(slang_cpp::slang_SlangSourceLanguage)
-VARIANT_ENUM_CAST(slang_cpp::slang_SlangSeverity)
-VARIANT_ENUM_CAST(slang_cpp::slang_SlangDebugInfoFormat)
-
+#include "slang_enums.h"
 namespace Slang{
     typedef ISlangFileSystem IFileSystem;
     typedef ISlangFileSystemExt IFileSystemExt;
     typedef ISlangMutableFileSystem IMutableFileSystem;
     typedef ISlangSharedLibrary ISharedLibrary;
 }
+using godot::memdelete;
 
 #define MAKE_TEMPLATE_CLASS(ClassName)                                                                                                                  \
-class slang_##ClassName##_PTR : public slang_SlangObject{                                                                                               \
-    GDCLASS(slang_##ClassName##_PTR,slang_SlangObject)                                                                                                  \
-private:                                                                                                                                                \
-    static void _bind_methods() {                                                                                                                       \
-        godot::ClassDB::bind_method(godot::D_METHOD("set_value", "value"), &slang_##ClassName##_PTR::set_value);                                        \
-        godot::ClassDB::bind_method(godot::D_METHOD("get_value"), &slang_##ClassName##_PTR::get_value);                                                 \
-        if constexpr(std::is_pointer_v<slang_##ClassName>)                                                                                              \
-            godot::ClassDB::add_property("slang_" #ClassName "_PTR", godot::PropertyInfo(godot::Variant::OBJECT, "value"),                              \
-                                     "set_value", "get_value");                                                                                         \
-    }                                                                                                                                                   \
-public:                                                                                                                                                 \
-    slang_##ClassName *value = nullptr;                                                                                                                 \
-    slang_##ClassName##_PTR(slang_##ClassName *v = nullptr) : value(v) {}                                                                               \
-    operator slang_##ClassName *() const {                                                                                                              \
-        return value;                                                                                                                                   \
-    }                                                                                                                                                   \
-    void set_value(slang_##ClassName *v) {                                                                                                              \
-        value = v;                                                                                                                                      \
-    }                                                                                                                                                   \
-    slang_##ClassName *get_value() const {                                                                                                              \
-        return value;                                                                                                                                   \
-    }                                                                                                                                                   \
-};                                                                                                                                                      \
-class slang_##ClassName##_HEAP_PTR : public slang_##ClassName##_PTR{                                                                                    \
-    GDCLASS(slang_##ClassName##_HEAP_PTR, slang_##ClassName##_PTR)                                                                                      \
+                                                                                                                                                      \
+class slang_##ClassName##_HEAP_PTR : public slang_SlangObject{                                                                                    \
+    GDCLASS(slang_##ClassName##_HEAP_PTR, slang_SlangObject)                                                                                      \
 public:                                                                                                                                                 \
     bool shouldFreeData = 0;                                                                                                                            \
-    bool isArr = 0;                                                                                                                                     \
+    bool isArr = 0;                                                                                                                                 \
+    slang_##ClassName *value = nullptr;                                                                                                                     \
     void set_shouldFreeData(bool v){                                                                                                                    \
         this->shouldFreeData = v;                                                                                                                       \
     }                                                                                                                                                   \
     bool get_shouldFreeData(){                                                                                                                          \
         return this->shouldFreeData;                                                                                                                    \
     }                                                                                                                                                   \
-    slang_##ClassName##_HEAP_PTR(slang_##ClassName* v = nullptr): slang_##ClassName##_PTR(v){}                                                          \
+    slang_##ClassName##_HEAP_PTR(slang_##ClassName* v): value(v){}                                                                    \
+    slang_##ClassName##_HEAP_PTR(){}                                                                                                                    \
     operator slang_##ClassName *() const{                                                                                                               \
         return this->value;                                                                                                                             \
     }                                                                                                                                                   \
-    void free_self(){                                                                                                                                   \
-        if(shouldFreeData){                                                                                                                             \
-            if(isArr)                                                                                                                                   \
-                delete[] this->value;                                                                                                                   \
-            else                                                                                                                                        \
-                delete this->value;                                                                                                                     \
-            this->value = nullptr;                                                                                                                      \
-        }                                                                                                                                               \
-        delete this;                                                                                                                                    \
+    void set_value(slang_##ClassName *v) {                                                                                                              \
+        value = v;                                                                                                                                      \
     }                                                                                                                                                   \
+    slang_##ClassName *get_value() const {                                                                                                                                                \
+        return value;                                                                                                                                   \
+    }                                                                                                                                                   \
+    void free_self();                                                                                                                                                   \
 private:                                                                                                                                                \
     static void _bind_methods() {                                                                                                                       \
+        godot::ClassDB::bind_method(godot::D_METHOD("set_value", "value"), &slang_##ClassName##_HEAP_PTR::set_value);                                   \
+        godot::ClassDB::bind_method(godot::D_METHOD("get_value"), &slang_##ClassName##_HEAP_PTR::get_value);                                            \
+        if constexpr(std::is_pointer_v<slang_##ClassName>)                                                                                              \
+            godot::ClassDB::add_property("slang_" #ClassName "_HEAP_PTR", godot::PropertyInfo(godot::Variant::OBJECT, "value"),                         \
+                                     "set_value", "get_value");                                                                                         \
         godot::ClassDB::bind_method(godot::D_METHOD("free_self"),&slang_##ClassName##_HEAP_PTR::free_self);                                             \
         godot::ClassDB::bind_method(godot::D_METHOD("set_shouldFreeData", "shouldFreeData"), &slang_##ClassName##_HEAP_PTR::set_shouldFreeData);        \
         godot::ClassDB::bind_method(godot::D_METHOD("get_shouldFreeData"), &slang_##ClassName##_HEAP_PTR::get_shouldFreeData);                          \
@@ -645,7 +59,7 @@ private:                                                                        
                                      "set_shouldFreeData", "get_shouldFreeData");                                                                       \
     }                                                                                                                                                   \
 };                                                                                                                                                      \
-class slang_##ClassName##_VECTOR: public slang_SlangObject,public std::vector<slang_##ClassName*> {                                                     \
+class slang_##ClassName##_VECTOR: public slang_SlangObject{                                                     \
 GDCLASS(slang_##ClassName##_VECTOR, slang_SlangObject)                                                                                                  \
     static void _bind_methods() {                                                                                                                       \
         godot::ClassDB::bind_method(godot::D_METHOD("push_back", "t"), &slang_##ClassName##_VECTOR::push_back);                                         \
@@ -657,48 +71,61 @@ GDCLASS(slang_##ClassName##_VECTOR, slang_SlangObject)                          
         godot::ClassDB::bind_method(godot::D_METHOD("set", "index", "t"), &slang_##ClassName##_VECTOR::set);                                            \
         godot::ClassDB::bind_method(godot::D_METHOD("at", "index"), &slang_##ClassName##_VECTOR::at);                                                   \
     }                                                                                                                                                   \
+    std::vector<slang_##ClassName*> value;                                                                                                          \
 public:                                                                                                                                                 \
-    slang_##ClassName##_VECTOR():std::vector<slang_##ClassName*>(){}                                                                                    \
-    slang_##ClassName##_VECTOR(int size):std::vector<slang_##ClassName*>(size){}                                                                        \
-    void push_back(slang_##ClassName* t){                                                                                                               \
-        this->std::vector<slang_##ClassName*>::push_back(t);                                                                                            \
+    slang_##ClassName##_VECTOR():value(){}                                                                                    \
+    slang_##ClassName##_VECTOR(int size):value(std::vector<slang_##ClassName*>(size)){}                                                                        \
+    void push_back(slang_##ClassName* t){                                                                                                                                                 \
+        value.push_back(t);                                                                                            \
     }                                                                                                                                                   \
     void pop_back(){                                                                                                                                    \
-        this->std::vector<slang_##ClassName*>::pop_back();                                                                                              \
+        value.pop_back();                                                                                              \
     }                                                                                                                                                   \
     int size(){                                                                                                                                         \
-        return this->std::vector<slang_##ClassName*>::size();                                                                                           \
+        return value.size();                                                                                           \
     }                                                                                                                                                   \
     void resize(int size){                                                                                                                              \
-        this->std::vector<slang_##ClassName*>::resize(size);                                                                                            \
+        value.resize(size);                                                                                            \
     }                                                                                                                                                   \
     void clear(){                                                                                                                                       \
-        this->std::vector<slang_##ClassName*>::clear();                                                                                                 \
+        value.clear();                                                                                                 \
     }                                                                                                                                                   \
     void swap(slang_##ClassName##_VECTOR* other){                                                                                                       \
-        this->std::vector<slang_##ClassName*>::swap(*other);                                                                                            \
+        value.swap(other->value);                                                                                            \
     }                                                                                                                                                   \
     slang_##ClassName*& operator[](int i){                                                                                                              \
-        return this->std::vector<slang_##ClassName*>::operator[](i);                                                                                    \
-    }                                                                                                                                                   \
+        return value[i];                                                                                    \
+    }                                                                                                                                                  \
     void set(int index,slang_##ClassName* t) {                                                                                                          \
-        if (index >= this->std::vector<slang_##ClassName*>::size())                                                                                     \
+        if (index >= value.size())                                                                                     \
             return;                                                                                                                                     \
-        (*this)[index] = t;                                                                                                                             \
+        value[index] = t;                                                                                                                             \
     }                                                                                                                                                   \
     slang_##ClassName* at(int index) {                                                                                                                  \
-        if (index >= this->std::vector<slang_##ClassName*>::size())                                                                                     \
+        if (index >= value.size())                                                                                     \
             throw std::out_of_range("index out of range");                                                                                              \
-        return (*this)[index];                                                                                                                          \
+        return value[index];                                                                                                                          \
     }                                                                                                                                                   \
 };
+#define MAKE_TEMPLATE_CLASS_SRC(ClassName) \
+    void slang_##ClassName##_HEAP_PTR::free_self(){                                                                                                                                   \
+        if(shouldFreeData){                                                                                                                             \
+            if(isArr)                                                                                                                                   \
+                delete[] this->value;                                                                                                                   \
+            else                                                                                                                                        \
+                godot::memdelete(this->value);                                                                                                                     \
+            this->value = nullptr;                                                                                                                      \
+        }                                                                                                                                               \
+        godot::memdelete(this);                                                                                                                                    \
+    }
+
 
 #define MAKE_VALUE_TEMPLATE(ClassName)                                                                                                                  \
 class slang_##ClassName##_VALUE : public slang_SlangObject{                                                                                             \
     GDCLASS(slang_##ClassName##_VALUE,slang_SlangObject)                                                                                                \
 private:                                                                                                                                                \
     static void _bind_methods() {                                                                                                                       \
-        godot::ClassDB::bind_method(godot::D_METHOD("set_value", "value"), &slang_##ClassName##_PTR::set_value);                                        \
+        godot::ClassDB::bind_method(godot::D_METHOD("set_value", "value"), &slang_##ClassName##_VALUE::set_value);                                        \
     }                                                                                                                                                   \
 public:                                                                                                                                                 \
     decltype(slang_##ClassName().duplicate()) value;                                                                                                    \
@@ -793,10 +220,10 @@ public:                                                                         
             if(isArr)                                                                                                                                   \
                 delete[] this->value;                                                                                                                   \
             else                                                                                                                                        \
-                delete this->value;                                                                                                                     \
+                godot::memdelete(this->value);                                                                                                                     \
             this->value = nullptr;                                                                                                                      \
         }                                                                                                                                               \
-        delete this;                                                                                                                                    \
+        godot::memdelete(this);                                                                                                                                    \
     }                                                                                                                                                   \
 private:                                                                                                                                                \
     static void _bind_methods() {                                                                                                                       \
@@ -1032,67 +459,9 @@ namespace slang_cpp {
             value = (void*)v.utf8().get_data();
         }
         godot::String get_value_s() const {
-            if(value == 0)
+            if(value == nullptr)
                 return "";
             return godot::String().utf8((char*)value);
-        }
-    };
-    class slang_PTR : public slang_SlangObject {
-    GDCLASS(slang_PTR, slang_SlangObject)
-    protected:
-        godot::Object *value = nullptr;
-    private:
-        static void _bind_methods() {
-            godot::ClassDB::bind_method(godot::D_METHOD("set_value", "value"), &slang_PTR::set_value);
-            godot::ClassDB::bind_method(godot::D_METHOD("get_value"), &slang_PTR::get_value);
-            godot::ClassDB::add_property("slang_PTR", godot::PropertyInfo(godot::Variant::OBJECT, "value"),
-                                         "set_value", "get_value");
-        }
-
-    public:
-        slang_PTR(godot::Object *v = nullptr) : value(v) {}
-
-        operator godot::Object *() const {
-            return value;
-        }
-
-        void set_value(godot::Object *v) {
-            value = v;
-        }
-
-        godot::Object *get_value() const {
-            return value;
-        }
-    };
-    class slang_HEAP_PTR : public slang_PTR{
-        GDCLASS(slang_HEAP_PTR, slang_PTR)
-    public:
-        bool shouldFreeData = 0;
-        void set_shouldFreeData(bool v){
-            this->shouldFreeData = v;
-        }
-        bool get_shouldFreeData(){
-            return this->shouldFreeData;
-        }
-        slang_HEAP_PTR(godot::Object *v = nullptr): slang_PTR(v){}
-        operator godot::Object*() const{
-            return this->value;
-        }
-        void free_self(){
-            if(shouldFreeData){
-                delete this->value;
-                this->value = nullptr;
-            }
-            delete this;
-        }
-
-    private:
-        static void _bind_methods() {
-            godot::ClassDB::bind_method(godot::D_METHOD("free_self"),&slang_HEAP_PTR::free_self);
-            godot::ClassDB::bind_method(godot::D_METHOD("set_shouldFreeData", "shouldFreeData"), &slang_HEAP_PTR::set_shouldFreeData);
-            godot::ClassDB::bind_method(godot::D_METHOD("get_shouldFreeData"), &slang_HEAP_PTR::get_shouldFreeData);
-            godot::ClassDB::add_property("shouldFreeData", godot::PropertyInfo(godot::Variant::BOOL, "shouldFreeData"),
-                                         "set_shouldFreeData", "get_shouldFreeData");
         }
     };
 
@@ -1119,7 +488,7 @@ namespace slang_cpp {
             value = v;
         }
 
-        int64_t get_value() const {
+        [[nodiscard]] int64_t get_value() const {
             return value;
         }
     };
@@ -1129,7 +498,7 @@ namespace slang_cpp {
     class slang_BOOL : public slang_SlangObject {
     GDCLASS(slang_BOOL, slang_SlangObject)
 
-        bool value : 1 = 0;
+        bool value : 1 = false;
 
         static void _bind_methods() {
             godot::ClassDB::bind_method(godot::D_METHOD("set_value", "value"), &slang_BOOL::set_value);
@@ -1139,7 +508,7 @@ namespace slang_cpp {
         }
 
     public:
-        slang_BOOL(bool v = 0) : value(v) {}
+        slang_BOOL(bool v = false) : value(v) {}
 
         operator bool() const {
             return value;
@@ -1149,7 +518,7 @@ namespace slang_cpp {
             value = v;
         }
 
-        bool get_value() const {
+        [[nodiscard]] bool get_value() const {
             return value;
         }
     };
@@ -1260,68 +629,33 @@ namespace slang_cpp {
             return func;
         }
     };
-    template<typename Type,size_t N>
-    class slang_ARRAY: public slang_SlangObject{
-        GDCLASS(slang_ARRAY, slang_SlangObject)
-        static void _bind_methods(){
-            godot::ClassDB::bind_method(godot::D_METHOD("set_data", "arr"), &slang_ARRAY::set_data);
-            godot::ClassDB::bind_method(godot::D_METHOD("get_data"), &slang_ARRAY::get_data);
-            godot::ClassDB::bind_method(godot::D_METHOD("set", "index", "t"), &slang_ARRAY::set);
-            godot::ClassDB::bind_method(godot::D_METHOD("at", "index"), &slang_ARRAY::at);
-        }
-        Type data[N];
-    public:
-        slang_ARRAY() {
-            if constexpr(std::is_integral_v<Type>){
-                for(int i=0;i<N;i++){
-                    data[i] = 0;
-                }
-            }
-        }
-        slang_ARRAY(const Type (&arr)[N]) {
-            for(int i=0;i<N;i++){
-                data[i] = arr[i];
-            }
-        }
-        Type& operator[](size_t i) {
-            return data[i];
-        }
-        void set_data(const Type (&arr)[N]) {
-            for(int i=0;i<N;i++){
-                data[i] = arr[i];
-            }
-        }
-        Type* get_data() {
-            return data;
-        }
-
-        void set(int index,Type t){
-            if(index>=N)
-                return;
-            data[index] = t;
-        }
-        Type at(int index){
-            if(index>=N)
-                throw std::out_of_range("index out of range");
-            return data[index];
-        }
-    };
-
-
-    class slang_SlangRef : public godot::RefCounted {
-    GDCLASS(slang_SlangRef, godot::RefCounted)
+    class slang_SlangRef : public godot::Object {
+    GDCLASS(slang_SlangRef, godot::Object)
     public:
         static void _bind_methods() {}
     };
 
-    class slang_IUnknown : public ISlangUnknown, public slang_SlangRef{
+    class slang_IUnknown : public slang_SlangRef{
     GDCLASS(slang_IUnknown, slang_SlangRef)
     public:
+        ISlangUnknown* value = nullptr;
         ISlangUnknown* shift(){
-            return this;
+            return value;
+        }
+        bool has_value(){
+            return value;
+        }
+        slang_IUnknown() = default;
+        slang_IUnknown(ISlangUnknown* ival):value(ival){}
+        void operator=(ISlangUnknown* ival){
+            value = ival;
+        }
+        operator ISlangUnknown*(){
+            return value;
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_IUnknown::has_value);
             godot::ClassDB::bind_method(godot::D_METHOD("query_interface", "guid", "outObj"),
                                         &slang_IUnknown::_query_interface);
             godot::ClassDB::bind_method(godot::D_METHOD("add_ref"), &slang_IUnknown::_add_ref);
@@ -1331,22 +665,35 @@ namespace slang_cpp {
         SlangResult _query_interface(slang_UUID *guid, slang_VOID_PTR *outObj);
 
         uint32_t _add_ref() {
-            return this->addRef();
+            return value->addRef();
         }
 
         uint32_t _release() {
-            return this->release();
+            return value->release();
         }
     };
 
-    class slang_IGlobalSession : public slang::IGlobalSession, public slang_SlangRef{
+    class slang_IGlobalSession : public slang_SlangRef{
     GDCLASS(slang_IGlobalSession, slang_SlangRef)
     public:
+        slang::IGlobalSession* value = nullptr;
         slang::IGlobalSession* shift(){
-            return this;
+            return value;
+        }
+        bool has_value(){
+            return value;
+        }
+        slang_IGlobalSession() = default;
+        slang_IGlobalSession(slang::IGlobalSession* ival):value(ival){}
+        void operator=(slang::IGlobalSession* ival){
+            value = ival;
+        }
+        operator slang::IGlobalSession*(){
+            return value;
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_IGlobalSession::has_value);
             BIND_ENUM_CONSTANT(slang_SlangPassThrough::SLANG_PASS_THROUGH_NONE)
             BIND_ENUM_CONSTANT(slang_SlangPassThrough::SLANG_PASS_THROUGH_FXC)
             BIND_ENUM_CONSTANT(slang_SlangPassThrough::SLANG_PASS_THROUGH_DXC)
@@ -1426,100 +773,85 @@ namespace slang_cpp {
         }
 
     public:
-        SlangResult _createSession(slang_SessionDesc *desc, slang_ISession_PTR* outSession);
+        SlangResult _createSession(slang_SessionDesc *desc, slang_ISession* outSession);
 
         slang_SlangProfileID _findProfile(godot::String name) noexcept {
-            return static_cast<slang_SlangProfileID>(this->findProfile(name.utf8().get_data()));
+            return static_cast<slang_SlangProfileID>(value->findProfile(name.utf8().get_data()));
         }
 
         void _setDownstreamCompilerPath(slang_SlangPassThrough passThrough, godot::String path) {
-            return this->setDownstreamCompilerPath((SlangPassThrough) passThrough,
+            return value->setDownstreamCompilerPath((SlangPassThrough) passThrough,
                                                                           path.utf8().get_data());
         }
 
         void _setDownstreamCompilerPrelude(slang_SlangPassThrough passThrough, godot::String preludeText) {
-            return this->setDownstreamCompilerPrelude((SlangPassThrough) passThrough,
+            return value->setDownstreamCompilerPrelude((SlangPassThrough) passThrough,
                                                                              preludeText.utf8().get_data());
         }
 
-        void _getDownstreamCompilerPrelude(slang_SlangPassThrough passThrough, slang_IBlob_PTR*outPrelude) {
-            return this->getDownstreamCompilerPrelude((SlangPassThrough) passThrough,
-                                                                             reinterpret_cast<ISlangBlob **>(&outPrelude->value));
-        }
+        void _getDownstreamCompilerPrelude(slang_SlangPassThrough passThrough, slang_IBlob*outPrelude);
 
         godot::String _getBuildTagString() {
-            auto a = this->getBuildTagString();
+            auto a = value->getBuildTagString();
             if(a == 0)
                 return "";
             return godot::String().utf8(a);
         }
 
         SlangResult _setDefaultDownstreamCompiler(slang_SlangSourceLanguage sourceLanguage, slang_SlangPassThrough defaultCompiler) {
-            return this->setDefaultDownstreamCompiler(
+            return value->setDefaultDownstreamCompiler(
                     static_cast<SlangSourceLanguage>(sourceLanguage), static_cast<SlangPassThrough>(defaultCompiler));
         }
 
         int _getDefaultDownstreamCompiler(slang_SlangSourceLanguage sourceLanguage) {
-            return this->getDefaultDownstreamCompiler(
+            return value->getDefaultDownstreamCompiler(
                     static_cast<SlangSourceLanguage>(sourceLanguage));
         }
 
         void _setLanguagePrelude(slang_SlangSourceLanguage sourceLanguage, godot::String preludeText) {
-            return this->setLanguagePrelude(
+            return value->setLanguagePrelude(
                     static_cast<SlangSourceLanguage>(sourceLanguage), preludeText.utf8().get_data());
         }
 
-        void _getLanguagePrelude(slang_SlangSourceLanguage sourceLanguage, slang_IBlob_PTR*outPrelude) {
-            return this->getLanguagePrelude(
-                    static_cast<SlangSourceLanguage>(sourceLanguage),
-                    reinterpret_cast<ISlangBlob **>(&outPrelude->value));
-        }
+        void _getLanguagePrelude(slang_SlangSourceLanguage sourceLanguage, slang_IBlob*outPrelude);
 
-        SlangResult _createCompileRequest(slang_ICompileRequest_PTR*outCompileRequest) {
-            return this->createCompileRequest(
-                    reinterpret_cast<slang::ICompileRequest **>(&outCompileRequest->value));
-        }
+        SlangResult _createCompileRequest(slang_ICompileRequest*outCompileRequest);
 
         void _addBuiltins(godot::String sourcePath, godot::String sourceString) {
-            return this->addBuiltins(sourcePath.utf8().get_data(),
+            return value->addBuiltins(sourcePath.utf8().get_data(),
                                                             sourceString.utf8().get_data());
         }
 
-        void _setSharedLibraryLoader(slang_ISharedLibraryLoader *loader) {
-            return this->setSharedLibraryLoader(
-                    reinterpret_cast<ISlangSharedLibraryLoader *>(loader));
-        }
+        void _setSharedLibraryLoader(slang_ISharedLibraryLoader *loader) const;
 
         slang_ISharedLibraryLoader *_getSharedLibraryLoader(slang_NULL *null);
 
         SlangResult _checkCompileTargetSupport(slang_SlangCompileTarget target) {
-            return this->checkCompileTargetSupport(static_cast<SlangCompileTarget>(target));
+            return value->checkCompileTargetSupport(static_cast<SlangCompileTarget>(target));
         }
 
         SlangResult _checkPassThroughSupport(slang_SlangPassThrough passThrough) {
-            return this->checkPassThroughSupport(static_cast<SlangPassThrough>(passThrough));
+            return value->checkPassThroughSupport(static_cast<SlangPassThrough>(passThrough));
         }
 
         SlangResult _compileStdLib(slang::CompileStdLibFlags flags) {
-            return this->compileStdLib(flags);
+            return value->compileStdLib(flags);
         }
 
         SlangResult _loadStdLib(slang_VOID_PTR* stdLib, size_t stdLibSizeInBytes) {
-            return this->loadStdLib(stdLib->get_value(), stdLibSizeInBytes);
+            return value->loadStdLib(stdLib->get_value(), stdLibSizeInBytes);
         }
 
-        SlangResult _saveStdLib(SlangArchiveType archiveType,slang_IBlob_PTR*outBlob) {
-            return this->saveStdLib(archiveType, reinterpret_cast<ISlangBlob **>(&outBlob->value));
-        }
+        SlangResult _saveStdLib(SlangArchiveType archiveType,slang_IBlob*outBlob);
 
         slang_SlangCapabilityID _findCapability(godot::String name) {
-            return static_cast<slang_SlangCapabilityID>(this->findCapability(
+            return static_cast<slang_SlangCapabilityID>(value->findCapability(
                     name.utf8().get_data()));
         }
 
         void _setDownstreamCompilerForTransition(slang_SlangCompileTarget source, slang_SlangCompileTarget target,
                                                 slang_SlangPassThrough passThrough) {
-            return this->setDownstreamCompilerForTransition(
+            return value->setDownstreamCompilerForTransition(
                     static_cast<SlangCompileTarget>(source),
                     static_cast<SlangCompileTarget>(target),
                     static_cast<SlangPassThrough>(passThrough));
@@ -1527,36 +859,49 @@ namespace slang_cpp {
 
         slang_SlangPassThrough
         _getDownstreamCompilerForTransition(slang_SlangCompileTarget source, slang_SlangCompileTarget target) {
-            return static_cast<slang_SlangPassThrough>(this->getDownstreamCompilerForTransition(
+            return static_cast<slang_SlangPassThrough>(value->getDownstreamCompilerForTransition(
                     static_cast<SlangCompileTarget>(source), static_cast<SlangCompileTarget>(target)));
         }
 
         void _getCompilerElapsedTime(slang_DOUBLE *outTotalTime, slang_DOUBLE *outDownstreamTime) {
             double totalTime, downstreamTime;
-            this->getCompilerElapsedTime(&totalTime, &downstreamTime);
+            value->getCompilerElapsedTime(&totalTime, &downstreamTime);
             outTotalTime->set_value(totalTime);
             outDownstreamTime->set_value(downstreamTime);
         }
 
         SlangResult _setSPIRVCoreGrammar(godot::String jsonPath) {
-            return this->setSPIRVCoreGrammar(jsonPath.utf8().get_data());
+            return value->setSPIRVCoreGrammar(jsonPath.utf8().get_data());
         }
 
         SlangResult
         _parseCommandLineArguments(godot::TypedArray<godot::String> args, slang_SessionDesc *outSessionDesc,
-                                  slang_IUnknown_PTR*outAuxAllocation);
+                                  slang_IUnknown*outAuxAllocation);
 
-        SlangResult _getSessionDescDigest(slang_SessionDesc *sessionDesc, slang_IBlob_PTR*outBlob);
+        SlangResult _getSessionDescDigest(slang_SessionDesc *sessionDesc, slang_IBlob*outBlob);
     };
 
-    class slang_ISession : public slang::ISession, public slang_SlangRef{
-    public:
-        slang::ISession* shift(){
-            return this;
-        }
+    class slang_ISession : public slang_SlangRef{
     GDCLASS(slang_ISession, slang_SlangRef)
+    public:
+        slang::ISession* value = nullptr;
+        slang::ISession* shift(){
+            return value;
+        }
+        bool has_value(){
+            return value;
+        }
+        slang_ISession() = default;
+        slang_ISession(slang::ISession* ival):value(ival){}
+        void operator=(slang::ISession* ival){
+            value = ival;
+        }
+        operator slang::ISession*(){
+            return value;
+        }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_ISession::has_value);
             godot::ClassDB::bind_method(godot::D_METHOD("loadModule", "moduleName", "outDiagnostics"),
                                         &slang_ISession::_loadModule);
             godot::ClassDB::bind_method(
@@ -1608,95 +953,142 @@ namespace slang_cpp {
         }
 
     public:
-        slang_IModule *_loadModule(godot::String moduleName, slang_IBlob_PTR *outDiagnostics);
+        slang_IModule_HEAP_PTR *_loadModule(godot::String moduleName, slang_IBlob *outDiagnostics) const;
 
         slang_IModule *_loadModuleFromSource(godot::String moduleName, godot::String path, slang_IBlob *source,
-                                            slang_IBlob_PTR *outDiagnostics);
+                                            slang_IBlob*outDiagnostics) const;
         SlangResult _createCompositeComponentType(slang_IComponentType_VECTOR* componentTypes,
-                                                                  slang_IComponentType_PTR *outCompositeComponentType,
-                                                                  slang_IBlob_PTR *outDiagnostics);
-        slang_TypeReflection_HEAP_PTR* _specializeType(slang_TypeReflection* type_, slang_SpecializationArg_VECTOR* specializationArgs, SlangInt specializationArgCount, slang_IBlob_PTR* outDiagnostics);
-        slang_TypeLayoutReflection_HEAP_PTR* _getTypeLayout(slang_TypeReflection* type_, SlangInt targetIndex, slang_LayoutRules rules, slang_IBlob_PTR* outDiagnostics);
-        slang_TypeReflection_HEAP_PTR* _getContainerType(slang_TypeReflection* elementType, slang_ContainerType containerType, slang_IBlob_PTR* outDiagnostics);
+                                                                  slang_IComponentType *outCompositeComponentType,
+                                                                  slang_IBlob *outDiagnostics);
+        slang_TypeReflection_HEAP_PTR* _specializeType(slang_TypeReflection* type_, slang_SpecializationArg_VECTOR* specializationArgs, SlangInt specializationArgCount, slang_IBlob* outDiagnostics) const;
+        slang_TypeLayoutReflection_HEAP_PTR* _getTypeLayout(slang_TypeReflection* type_, SlangInt targetIndex, slang_LayoutRules rules, slang_IBlob* outDiagnostics) const;
+        slang_TypeReflection_HEAP_PTR* _getContainerType(slang_TypeReflection* elementType, slang_ContainerType containerType, slang_IBlob* outDiagnostics);
         slang_TypeReflection_HEAP_PTR* _getDynamicType();
-        SlangResult _getTypeRTTIMangledName(slang_TypeReflection* type, slang_IBlob_PTR* outNameBlob);
-        SlangResult _getTypeConformanceWitnessMangledName(slang_TypeReflection* type, slang_TypeReflection* interfaceType, slang_IBlob_PTR* outNameBlob);
+        SlangResult _getTypeRTTIMangledName(slang_TypeReflection* type, slang_IBlob* outNameBlob);
+        SlangResult _getTypeConformanceWitnessMangledName(slang_TypeReflection* type, slang_TypeReflection* interfaceType, slang_IBlob* outNameBlob);
         SlangResult _getTypeConformanceWitnessSequentialID(slang_TypeReflection* type, slang_TypeReflection* interfaceType, slang_SIZE* outId);
-        SlangResult _createCompileRequest(slang_ICompileRequest_PTR*outCompileRequest) {
-            return this->createCompileRequest(
-                    reinterpret_cast<slang::ICompileRequest **>(&outCompileRequest->value));
-        }
-        SlangResult _createTypeConformanceComponentType(slang_TypeReflection* type, slang_TypeReflection* interfaceType, slang_ITypeConformance_PTR* outConformance, SlangInt conformanceIdOverride, slang_IBlob_PTR* outDiagnostics);
-        slang_IModule *_loadModuleFromIRBlob(godot::String moduleName, godot::String path, slang_IBlob *source, slang_IBlob_PTR *outDiagnostics);
+        SlangResult _createCompileRequest(slang_ICompileRequest*outCompileRequest);
+        SlangResult _createTypeConformanceComponentType(slang_TypeReflection* type, slang_TypeReflection* interfaceType, slang_ITypeConformance* outConformance, SlangInt conformanceIdOverride, slang_IBlob* outDiagnostics);
+        slang_IModule *_loadModuleFromIRBlob(godot::String moduleName, godot::String path, slang_IBlob *source, slang_IBlob *outDiagnostics);
         SlangInt _getLoadedModuleCount() {
-            return this->getLoadedModuleCount();
+            return value->getLoadedModuleCount();
         }
-        slang_IModule *_getLoadedModule(SlangInt index);
+        slang_IModule_HEAP_PTR *_getLoadedModule(SlangInt index);
         bool _isBinaryModuleUpToDate(godot::String modulePath, slang_IBlob *binaryModuleBlob);
-        slang_IModule *_loadModuleFromSourceString(godot::String moduleName, godot::String path, godot::String string, slang_IBlob_PTR *outDiagnostics);
+        slang_IModule_HEAP_PTR *_loadModuleFromSourceString(godot::String moduleName, godot::String path, godot::String string, slang_IBlob *outDiagnostics);
     };
 
-    class slang_IBlob : public slang::IBlob , public slang_SlangRef{
+    class slang_IBlob : public slang_SlangRef{
     GDCLASS(slang_IBlob, slang_SlangRef)
     public:
+        slang::IBlob* value = nullptr;
         slang::IBlob* shift(){
-            return this;
+            return value;
+        }
+        bool has_value(){
+            return value;
+        }
+        slang_IBlob() = default;
+        slang_IBlob(slang::IBlob* ival): value(ival){}
+        void operator=(slang::IBlob* ival){
+            value = ival;
+        }
+        operator slang::IBlob*(){
+            return value;
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_IBlob::has_value);
             godot::ClassDB::bind_method(godot::D_METHOD("getBufferPointer"), &slang_IBlob::_getBufferPointer);
             godot::ClassDB::bind_method(godot::D_METHOD("getBufferSize"), &slang_IBlob::_getBufferSize);
         }
     public:
         godot::String _getBufferPointer(){
-            auto a = (char*)this->getBufferPointer();
+            auto a = (char*)(value->getBufferPointer());
             if(a == 0)
                 return "";
             return godot::String().utf8(a);
         }
         size_t _getBufferSize(){
-            return this->getBufferSize();
+            return value->getBufferSize();
         }
     };
 
-    class slang_ICastable : public Slang::ICastable, public slang_SlangRef{
+    class slang_ICastable : public slang_SlangRef{
     GDCLASS(slang_ICastable, slang_SlangRef)
     public:
+        Slang::ICastable* value;
         Slang::ICastable* shift(){
-            return this;
+            return value;
+        }
+        bool has_value(){
+            return value;
+        }
+        slang_ICastable() = default;
+        slang_ICastable(Slang::ICastable* ival): value(ival){}
+        void operator=(Slang::ICastable* ival){
+            value = ival;
+        }
+        operator Slang::ICastable*(){
+            return value;
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_ICastable::has_value);
             godot::ClassDB::bind_method(godot::D_METHOD("castAs", "uuid"), &slang_ICastable::_castAs);
         }
     public:
         godot::String _castAs(slang_UUID* uuid);
     };
 
-    class slang_IFileSystem : public Slang::IFileSystem , public slang_SlangRef{
+    class slang_IFileSystem : public slang_SlangRef{
     GDCLASS(slang_IFileSystem, slang_SlangRef)
     public:
+        Slang::IFileSystem* value = nullptr;
         Slang::IFileSystem* shift(){
-            return this;
+            return value;
+        }
+        bool has_value(){
+            return value;
+        }
+        slang_IFileSystem() = default;
+        slang_IFileSystem(Slang::IFileSystem* ival):value(ival){}
+        void operator=(Slang::IFileSystem* ival){
+            value = ival;
+        }
+        operator Slang::IFileSystem*(){
+            return value;
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_IFileSystem::has_value);
             godot::ClassDB::bind_method(godot::D_METHOD("loadFile", "path", "outBlob"), &slang_IFileSystem::_loadFile);
         }
     public:
-        SlangResult _loadFile(godot::String path, slang_IBlob_PTR* outBlob){
-            return this->loadFile(path.utf8().get_data(), reinterpret_cast<ISlangBlob **>(&outBlob->value));
-        }
+        SlangResult _loadFile(godot::String path, slang_IBlob* outBlob);
     };
 
-    class slang_IFileSystemExt : public Slang::IFileSystemExt, public  slang_SlangRef{
+    class slang_IFileSystemExt : public  slang_SlangRef{
     GDCLASS(slang_IFileSystemExt, slang_SlangRef)
     public:
+        Slang::IFileSystemExt* value = nullptr;
         Slang::IFileSystemExt* shift(){
-            return this;
+            return value;
+        }
+        bool has_value(){
+            return value;
+        }
+        slang_IFileSystemExt() = default;
+        slang_IFileSystemExt(Slang::IFileSystemExt* ival):value(ival){}
+        void operator=(Slang::IFileSystemExt* ival){
+            value = ival;
+        }
+        operator Slang::IFileSystemExt*(){
+            return value;
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_IFileSystemExt::has_value);
             BIND_ENUM_CONSTANT(slang_SlangPathType::SLANG_PATH_TYPE_DIRECTORY)
             BIND_ENUM_CONSTANT(slang_SlangPathType::SLANG_PATH_TYPE_FILE)
             BIND_ENUM_CONSTANT(slang_PathKind::Simplified)
@@ -1716,37 +1108,50 @@ namespace slang_cpp {
             godot::ClassDB::bind_method(godot::D_METHOD("getOSPathKind"), &slang_IFileSystemExt::_getOSPathKind);
         }
     public:
-        SlangResult _getFileUniqueIdentity(godot::String path, slang_IBlob_PTR* outBlob){
-            return this->getFileUniqueIdentity(path.utf8().get_data(), reinterpret_cast<ISlangBlob **>(&outBlob->value));
+        SlangResult _getFileUniqueIdentity(godot::String path, slang_IBlob* outBlob){
+            return value->getFileUniqueIdentity(path.utf8().get_data(), &outBlob->value);
         }
-        SlangResult _calcCombinedPath(slang_SlangPathType pathType, godot::String fromPath, godot::String path, slang_IBlob_PTR* pathOut){
-            return this->calcCombinedPath(static_cast<SlangPathType>(pathType), fromPath.utf8().get_data(), path.utf8().get_data(), reinterpret_cast<ISlangBlob **>(&pathOut->value));
+        SlangResult _calcCombinedPath(slang_SlangPathType pathType, godot::String fromPath, godot::String path, slang_IBlob* pathOut){
+            return value->calcCombinedPath(static_cast<SlangPathType>(pathType), fromPath.utf8().get_data(), path.utf8().get_data(), &pathOut->value);
         }
         SlangResult _getPathType(godot::String path, slang_ENUM<slang_SlangPathType>* pathTypeOut){
             SlangPathType pathType;
-            SlangResult res = this->getPathType(path.utf8().get_data(), &pathType);
+            SlangResult res = value->getPathType(path.utf8().get_data(), &pathType);
             pathTypeOut->set_value(static_cast<slang_SlangPathType>(pathType));
             return res;
         }
-        SlangResult _getPath(slang_PathKind kind, godot::String path, slang_IBlob_PTR* pathOut){
-            return this->getPath(static_cast<PathKind>(kind), path.utf8().get_data(), reinterpret_cast<ISlangBlob **>(&pathOut->value));
+        SlangResult _getPath(slang_PathKind kind, godot::String path, slang_IBlob* pathOut){
+            return value->getPath(static_cast<PathKind>(kind), path.utf8().get_data(), &pathOut->value);
         }
         SlangResult _enumeratePathContents(godot::String path,void(*callback)(SlangPathType pathType, const char* name, void* userData) , slang_VOID_PTR userData){
-            return this->enumeratePathContents(path.utf8().get_data(), callback, userData);
+            return value->enumeratePathContents(path.utf8().get_data(), callback, userData);
         }
         slang_OSPathKind _getOSPathKind(){
-            return static_cast<slang_OSPathKind>(this->getOSPathKind());
+            return static_cast<slang_OSPathKind>(value->getOSPathKind());
         }
     };
 
-    class slang_IMutableFileSystem : public Slang::IMutableFileSystem, public  slang_SlangRef{
+    class slang_IMutableFileSystem : public  slang_SlangRef{
     GDCLASS(slang_IMutableFileSystem, slang_SlangRef)
     public:
+        Slang::IMutableFileSystem* value = nullptr;
         Slang::IMutableFileSystem* shift(){
-            return this;
+            return value;
+        }
+        bool has_value(){
+            return value;
+        }
+        slang_IMutableFileSystem() = default;
+        slang_IMutableFileSystem(Slang::IMutableFileSystem* ival): value(ival){}
+        void operator=(Slang::IMutableFileSystem* ival){
+            value = ival;
+        }
+        operator Slang::IMutableFileSystem*(){
+            return value;
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_IMutableFileSystem::has_value);
             godot::ClassDB::bind_method(godot::D_METHOD("saveFile", "path", "data", "size"), &slang_IMutableFileSystem::_saveFile);
             godot::ClassDB::bind_method(godot::D_METHOD("saveFileBlob", "path", "blob"), &slang_IMutableFileSystem::_saveFileBlob);
             godot::ClassDB::bind_method(godot::D_METHOD("remove", "path"), &slang_IMutableFileSystem::_remove);
@@ -1755,67 +1160,106 @@ namespace slang_cpp {
 
     public:
         SlangResult _saveFile(godot::String path, slang_VOID_PTR* data, size_t size){
-            return this->saveFile(path.utf8().get_data(), data->get_value(), size);
+            return value->saveFile(path.utf8().get_data(), data->get_value(), size);
         }
         SlangResult _saveFileBlob(godot::String path, slang_IBlob* blob){
-            return this->saveFileBlob(path.utf8().get_data(), static_cast<ISlangBlob *>(blob));
+            return value->saveFileBlob(path.utf8().get_data(), blob->value);
         }
         SlangResult _remove(godot::String path){
-            return this->remove(path.utf8().get_data());
+            return value->remove(path.utf8().get_data());
         }
         SlangResult _createDirectory(godot::String path) {
-            return this->createDirectory(path.utf8().get_data());
+            return value->createDirectory(path.utf8().get_data());
         }
     };
 
-    class slang_ISharedLibrary : public Slang::ISharedLibrary, public slang_SlangRef{
+    class slang_ISharedLibrary : public slang_SlangRef{
     GDCLASS(slang_ISharedLibrary, slang_SlangRef)
     public:
+        Slang::ISharedLibrary* value = nullptr;
         Slang::ISharedLibrary* shift(){
-            return this;
+            return value;
+        }
+        bool has_value(){
+            return value;
+        }
+        slang_ISharedLibrary() = default;
+        slang_ISharedLibrary(Slang::ISharedLibrary* ival):value(ival){}
+        void operator=(Slang::ISharedLibrary* ival){
+            value = ival;
+        }
+        operator Slang::ISharedLibrary*(){
+            return value;
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_ISharedLibrary::has_value);
             godot::ClassDB::bind_method(godot::D_METHOD("findSymbolAddressByName", "name"), &slang_ISharedLibrary::_findSymbolAddressByName);
         }
     public:
         SlangFuncPtr _findFuncByName(godot::String name){
-            return this->findFuncByName(name.utf8().get_data());
+            return value->findFuncByName(name.utf8().get_data());
         }
         godot::String _findSymbolAddressByName(godot::String name){
-            auto a = static_cast<char *>(const_cast<void *>(this->findSymbolAddressByName(name.utf8().get_data())));
+            auto a = static_cast<char *>(const_cast<void *>(value->findSymbolAddressByName(name.utf8().get_data())));
             if(a == 0)
                 return "";
             return godot::String().utf8(a);
         }
     };
 
-    class slang_ISharedLibraryLoader : public ISlangSharedLibraryLoader, public slang_SlangRef{
+    class slang_ISharedLibraryLoader : public slang_SlangRef{
     GDCLASS(slang_ISharedLibraryLoader, slang_SlangRef)
     public:
+        ISlangSharedLibraryLoader* value = nullptr;
         ISlangSharedLibraryLoader* shift(){
-            return this;
+            return value;
+        }
+        bool has_value(){
+            return value;
+        }
+        slang_ISharedLibraryLoader() = default;
+        slang_ISharedLibraryLoader(ISlangSharedLibraryLoader* ival):value(ival){}
+        void operator=(ISlangSharedLibraryLoader* ival){
+            value = ival;
+        }
+        operator ISlangSharedLibraryLoader*(){
+            return value;
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_ISharedLibraryLoader::has_value);
             godot::ClassDB::bind_method(godot::D_METHOD("loadSharedLibrary", "path", "sharedLibraryOut"),
                                         &slang_ISharedLibraryLoader::_loadSharedLibrary);
         }
 
     public:
-        SlangResult _loadSharedLibrary(godot::String path, slang_ISharedLibrary_PTR*sharedLibraryOut) {
-            return this->loadSharedLibrary(path.utf8().get_data(),
-                                                                      reinterpret_cast<ISlangSharedLibrary **>(&sharedLibraryOut->value));
+        SlangResult _loadSharedLibrary(godot::String path, slang_ISharedLibrary*sharedLibraryOut) {
+            return value->loadSharedLibrary(path.utf8().get_data(),
+                                                                      &sharedLibraryOut->value);
         }
     };
-    class slang_IComponentType : public slang::IComponentType, public slang_SlangRef{
+    class slang_IComponentType : public slang_SlangRef{
     GDCLASS(slang_IComponentType, slang_SlangRef)
     public:
+        slang::IComponentType* value = nullptr;
         slang::IComponentType* shift(){
-            return this;
+            return value;
+        }
+        bool has_value(){
+            return value;
+        }
+        slang_IComponentType() = default;
+        slang_IComponentType(slang::IComponentType* ival): value(ival){}
+        void operator=(slang::IComponentType* ival){
+            value = ival;
+        }
+        operator slang::IComponentType*(){
+            return value;
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_IComponentType::has_value);
             godot::ClassDB::bind_method(godot::D_METHOD("getSession"), &slang_IComponentType::_getSession);
             godot::ClassDB::bind_method(godot::D_METHOD("getLayout", "targetIndex", "blob"), &slang_IComponentType::_getLayout);
             godot::ClassDB::bind_method(godot::D_METHOD("getSpecializationParamCount"), &slang_IComponentType::_getSpecializationParamCount);
@@ -1830,68 +1274,104 @@ namespace slang_cpp {
         }
     public:
         slang_ISession *_getSession() {
-            return dynamic_cast<slang_ISession *>(this->getSession());
+            return dynamic_cast<slang_ISession *>(value->getSession());
         }
 
-        slang_ShaderReflection* a(SlangInt targetIndex = 0,slang_IBlob_PTR* blob = nullptr);
-
-        slang_ShaderReflection_HEAP_PTR* _getLayout(SlangInt targetIndex = 0,slang_IBlob_PTR* blob = nullptr);
+        slang_ShaderReflection_HEAP_PTR* _getLayout(SlangInt targetIndex = 0,slang_IBlob* blob = nullptr) const;
         SlangInt _getSpecializationParamCount(){
-            return this->getSpecializationParamCount();
+            return value->getSpecializationParamCount();
         }
-        SlangResult _getEntryPointCode(SlangInt entryPointIndex,SlangInt targetIndex,slang_IBlob_PTR* outCode,slang_IBlob_PTR* outDiagnostics = nullptr){
-            return this->getEntryPointCode(entryPointIndex,targetIndex,reinterpret_cast<ISlangBlob **>(&outCode->value),reinterpret_cast<ISlangBlob **>(outDiagnostics==nullptr?nullptr:&outDiagnostics->value));
+        SlangResult _getEntryPointCode(SlangInt entryPointIndex,SlangInt targetIndex,slang_IBlob* outCode,slang_IBlob* outDiagnostics = nullptr){
+            return value->getEntryPointCode(entryPointIndex,targetIndex,&outCode->value,outDiagnostics==nullptr?nullptr:&outDiagnostics->value);
         }
-        SlangResult _getResultAsFileSystem(SlangInt entryPointIndex,SlangInt targetIndex,slang_IMutableFileSystem_PTR* outFileSystem){
-            return this->getResultAsFileSystem(entryPointIndex,targetIndex,reinterpret_cast<ISlangMutableFileSystem **>(&outFileSystem->value));
+        SlangResult _getResultAsFileSystem(SlangInt entryPointIndex,SlangInt targetIndex,slang_IMutableFileSystem* outFileSystem){
+            return value->getResultAsFileSystem(entryPointIndex,targetIndex,&outFileSystem->value);
         }
-        void _getEntryPointHash(SlangInt entryPointIndex,SlangInt targetIndex,slang_IBlob_PTR* outHash){
-            return this->getEntryPointHash(entryPointIndex,targetIndex,reinterpret_cast<ISlangBlob **>(&outHash->value));
+        void _getEntryPointHash(SlangInt entryPointIndex,SlangInt targetIndex,slang_IBlob* outHash){
+            return value->getEntryPointHash(entryPointIndex,targetIndex,&outHash->value);
         }
-        SlangResult _specialize(slang_SpecializationArg_VECTOR* specializationArgs,SlangInt specializationArgCount,slang_IComponentType_PTR* specializedOut,slang_IBlob_PTR* outDiagnostics = nullptr);
-        SlangResult _link(slang_IComponentType_PTR* module,slang_IBlob_PTR* outDiagnostics = nullptr){
-            return this->link(reinterpret_cast<IComponentType **>(&module->value),reinterpret_cast<ISlangBlob **>(outDiagnostics==nullptr?nullptr:&outDiagnostics->value));
+        SlangResult _specialize(slang_SpecializationArg_VECTOR* specializationArgs,SlangInt specializationArgCount,slang_IComponentType* specializedOut,slang_IBlob* outDiagnostics = nullptr) const;
+        SlangResult _link(slang_IComponentType* module,slang_IBlob* outDiagnostics = nullptr){
+            return value->link(&module->value,outDiagnostics==nullptr?nullptr:&outDiagnostics->value);
         }
-        SlangResult _getEntryPointHostCallable(int entryPointIndex,int targetIndex,slang_ISharedLibrary_PTR* outSharedLibrary, slang_IBlob_PTR* outDiagnostics = nullptr){
-            return this->getEntryPointHostCallable(entryPointIndex,targetIndex,reinterpret_cast<ISlangSharedLibrary **>(&outSharedLibrary->value),reinterpret_cast<ISlangBlob **>(outDiagnostics==nullptr?nullptr:&outDiagnostics->value));
+        SlangResult _getEntryPointHostCallable(int entryPointIndex,int targetIndex,slang_ISharedLibrary* outSharedLibrary, slang_IBlob* outDiagnostics = nullptr){
+            return value->getEntryPointHostCallable(entryPointIndex,targetIndex,&outSharedLibrary->value,outDiagnostics==nullptr?nullptr:&outDiagnostics->value);
         }
-        SlangResult _linkWithOptions(slang_IComponentType_PTR* outLinkedComponentType,uint32_t compilerOptionEntryCount,slang_CompilerOptionEntry* compilerOptionEntries,slang_IBlob_PTR* outDiagnostics = nullptr);
-        SlangResult _getTargetCode(SlangInt targetIndex,slang_IBlob_PTR* outCode,slang_IBlob_PTR* outDiagnostics = nullptr){
-            return this->getTargetCode(targetIndex,reinterpret_cast<ISlangBlob **>(&outCode->value),reinterpret_cast<ISlangBlob **>(outDiagnostics==nullptr?nullptr:&outDiagnostics->value));
+        SlangResult _linkWithOptions(slang_IComponentType* outLinkedComponentType,uint32_t compilerOptionEntryCount,slang_CompilerOptionEntry* compilerOptionEntries,slang_IBlob* outDiagnostics = nullptr) const;
+        SlangResult _getTargetCode(SlangInt targetIndex,slang_IBlob* outCode,slang_IBlob* outDiagnostics = nullptr){
+            return value->getTargetCode(targetIndex,&outCode->value,outDiagnostics==nullptr?nullptr:&outDiagnostics->value);
         }
     };
-    class slang_ITypeConformance : public slang::ITypeConformance, public slang_SlangRef{
+    class slang_ITypeConformance : public slang_SlangRef{
     GDCLASS(slang_ITypeConformance, slang_SlangRef)
     public:
+        slang::ITypeConformance* value = nullptr;
         slang::ITypeConformance* shift(){
-            return this;
+            return value;
+        }
+        bool has_value(){
+            return value;
+        }
+        slang_ITypeConformance() = default;
+        slang_ITypeConformance(slang::ITypeConformance* ival){}
+        void operator=(slang::ITypeConformance* ival){
+            value = ival;
+        }
+        operator slang::ITypeConformance*(){
+            return value;
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_ITypeConformance::has_value);
 
         }
     };
-    class slang_IEntryPoint : public slang::IEntryPoint , public slang_SlangRef{
+    class slang_IEntryPoint : public slang_SlangRef{
     GDCLASS(slang_IEntryPoint, slang_SlangRef)
     public:
+        slang::IEntryPoint* value = nullptr;
         slang::IEntryPoint* shift(){
-            return this;
+            return value;
+        }
+        bool has_value(){
+            return value;
+        }
+        slang_IEntryPoint() = default;
+        slang_IEntryPoint(slang::IEntryPoint* ival):value(ival){}
+        void operator=(slang::IEntryPoint* ival){
+            value = ival;
+        }
+        operator slang::IEntryPoint*(){
+            return value;
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_IEntryPoint::has_value);
             godot::ClassDB::bind_method(godot::D_METHOD("getFunctionReflection"), &slang_IEntryPoint::_getFunctionReflection);
         }
         slang_FunctionReflection_HEAP_PTR* _getFunctionReflection();
     };
-
-    class slang_IModule : public slang::IModule, public slang_SlangRef{
+    class slang_IModule : public slang_SlangRef{
     GDCLASS(slang_IModule, slang_SlangRef)
     public:
+        slang::IModule* value = nullptr;
         slang::IModule* shift(){
-            return this;
+            return value;
+        }
+        bool has_value(){
+            return value;
+        }
+        slang_IModule() = default;
+        slang_IModule(slang::IModule* ival):value(ival){}
+        void operator=(slang::IModule* ival){
+            value = ival;
+        }
+        operator slang::IModule*(){
+            return value;
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_IModule::has_value);
             godot::ClassDB::bind_method(godot::D_METHOD("findEntryPointByName", "name", "outEntryPoint"), &slang_IModule::_findEntryPointByName);
             godot::ClassDB::bind_method(godot::D_METHOD("getDefinedEntryPointCount"), &slang_IModule::_getDefinedEntryPointCount);
             godot::ClassDB::bind_method(godot::D_METHOD("getDefinedEntryPoint", "index", "outEntryPoint"), &slang_IModule::_getDefinedEntryPoint);
@@ -1907,65 +1387,78 @@ namespace slang_cpp {
             godot::ClassDB::bind_method(godot::D_METHOD("precompileForTarget", "target", "outDiagnostics"), &slang_IModule::_precompileForTarget);
         }
     public:
-        SlangResult _findEntryPointByName(godot::String name, slang_IEntryPoint_PTR* outEntryPoint){
-            return this->findEntryPointByName(name.utf8().get_data(),reinterpret_cast<slang::IEntryPoint **>(&outEntryPoint->value));
+        SlangResult _findEntryPointByName(godot::String name, slang_IEntryPoint* outEntryPoint){
+            return value->findEntryPointByName(name.utf8().get_data(),&outEntryPoint->value);
         }
         SlangInt32 _getDefinedEntryPointCount(){
-            return this->getDefinedEntryPointCount();
+            return value->getDefinedEntryPointCount();
         }
-        SlangResult _getDefinedEntryPoint(SlangInt32 index, slang_IEntryPoint_PTR* outEntryPoint){
-            return this->getDefinedEntryPoint(index,reinterpret_cast<slang::IEntryPoint **>(&outEntryPoint->value));
+        SlangResult _getDefinedEntryPoint(SlangInt32 index, slang_IEntryPoint* outEntryPoint){
+            return value->getDefinedEntryPoint(index,&outEntryPoint->value);
         }
-        SlangResult _serialize(slang_IBlob_PTR* outBlob){
-            return this->serialize(reinterpret_cast<ISlangBlob **>(&outBlob->value));
+        SlangResult _serialize(slang_IBlob* outBlob){
+            return value->serialize(&outBlob->value);
         }
         SlangResult _writeToFile(godot::String fileName){
-            return this->writeToFile(fileName.utf8().get_data());
+            return value->writeToFile(fileName.utf8().get_data());
         }
         godot::String _getName(){
-            auto a = this->getName();
+            auto a = value->getName();
             if(a == 0)
                 return "";
             return godot::String().utf8(a);
         }
         godot::String _getFilePath(){
-            auto a = this->getFilePath();
+            auto a = value->getFilePath();
             if(a == 0)
                 return "";
             return godot::String().utf8(a);
         }
         godot::String _getUniqueIdentity(){
-            auto a = this->getUniqueIdentity();
+            auto a = value->getUniqueIdentity();
             if(a == 0)
                 return "";
             return godot::String().utf8(a);
         }
-        SlangResult _findAndCheckEntryPoint(godot::String name,slang_SlangStage stage,slang_IEntryPoint_PTR* outEntryPoint,slang_IBlob_PTR* outDiagnostics){
-            return this->findAndCheckEntryPoint(name.utf8().get_data(),static_cast<SlangStage>(stage),reinterpret_cast<slang::IEntryPoint **>(&outEntryPoint->value),reinterpret_cast<ISlangBlob **>(&outDiagnostics->value));
+        SlangResult _findAndCheckEntryPoint(godot::String name,slang_SlangStage stage,slang_IEntryPoint* outEntryPoint,slang_IBlob* outDiagnostics){
+            return value->findAndCheckEntryPoint(name.utf8().get_data(),static_cast<SlangStage>(stage),&outEntryPoint->value,&outDiagnostics->value);
         }
         SlangInt32 _getDependencyFileCount(){
-            return this->getDependencyFileCount();
+            return value->getDependencyFileCount();
         }
         godot::String _getDependencyFilePath(SlangInt32 index){
-            auto a = this->getDependencyFilePath(index);
+            auto a = value->getDependencyFilePath(index);
             if(a == 0)
                 return "";
             return godot::String().utf8(a);
         }
-        slang_DeclReflection_HEAP_PTR* _getModuleReflection();
-        SlangResult _precompileForTarget(slang_SlangCompileTarget target,slang_IBlob_PTR* outDiagnostics){
-            return this->precompileForTarget(static_cast<SlangCompileTarget>(target),reinterpret_cast<ISlangBlob **>(&outDiagnostics->value));
+        slang_DeclReflection_HEAP_PTR* _getModuleReflection() const;
+        SlangResult _precompileForTarget(slang_SlangCompileTarget target,slang_IBlob* outDiagnostics){
+            return value->precompileForTarget(static_cast<SlangCompileTarget>(target),&outDiagnostics->value);
         }
     };
 
-    class slang_IWriter : public ISlangWriter, public slang_SlangRef{
+    class slang_IWriter : public slang_SlangRef{
     GDCLASS(slang_IWriter, slang_SlangRef)
     public:
+        ISlangWriter* value = nullptr;
         ISlangWriter* shift(){
-            return this;
+            return value;
+        }
+        bool has_value(){
+            return value;
+        }
+        slang_IWriter() = default;
+        slang_IWriter(ISlangWriter* ival):value(ival){}
+        void operator=(ISlangWriter* ival){
+            value = ival;
+        }
+        operator ISlangWriter*(){
+            return value;
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_IWriter::has_value);
             BIND_ENUM_CONSTANT(slang_SlangWriterMode::SLANG_WRITER_MODE_TEXT)
             BIND_ENUM_CONSTANT(slang_SlangWriterMode::SLANG_WRITER_MODE_BINARY)
 
@@ -1978,32 +1471,44 @@ namespace slang_cpp {
         }
     public:
         godot::String _beginAppendBuffer(size_t maxNumChars){
-            auto a = this->beginAppendBuffer(maxNumChars);
+            auto a = value->beginAppendBuffer(maxNumChars);
             if(a == 0)
                 return "";
             return godot::String().utf8(a);
         }
         SlangResult _endAppendBuffer(godot::String buffer,size_t numChars){
-            return this->endAppendBuffer(const_cast<char *>(buffer.utf8().get_data()), numChars);
+            return value->endAppendBuffer(const_cast<char *>(buffer.utf8().get_data()), numChars);
         }
         SlangResult _write(godot::String chars, size_t numChars){
-            return this->write(const_cast<char *>(chars.utf8().get_data()), numChars);
+            return value->write(const_cast<char *>(chars.utf8().get_data()), numChars);
         }
         void _flush(){
-            return this->flush();
+            return value->flush();
         }
         bool _isConsole(){
-            return this->isConsole();
+            return value->isConsole();
         }
         SlangResult _setMode(slang_SlangWriterMode mode){
-            return this->setMode(static_cast<SlangWriterMode>(mode));
+            return value->setMode(static_cast<SlangWriterMode>(mode));
         }
     };
-    class slang_IProfiler : public ISlangProfiler, public slang_SlangRef{
+    class slang_IProfiler : public slang_SlangRef{
     GDCLASS(slang_IProfiler, slang_SlangRef)
     public:
+        ISlangProfiler* value = nullptr;
         ISlangProfiler* shift(){
-            return this;
+            return value;
+        }
+        bool has_value(){
+            return value;
+        }
+        slang_IProfiler() = default;
+        slang_IProfiler(ISlangProfiler* ival):value(ival){}
+        void operator=(ISlangProfiler* ival){
+            value = ival;
+        }
+        operator ISlangProfiler*(){
+            return value;
         }
     private:
         static void _bind_methods(){
@@ -2014,29 +1519,42 @@ namespace slang_cpp {
         }
     public:
         size_t _getEntryCount(){
-            return this->getEntryCount();
+            return value->getEntryCount();
         }
         godot::String _getEntryName(uint32_t index){
-            auto a =  this->getEntryName(index);
+            auto a =  value->getEntryName(index);
             if(a == 0)
                 return "";
             return godot::String().utf8(a);
         }
         long _getEntryTimeMS(uint32_t index){
-            return this->getEntryTimeMS(index);
+            return value->getEntryTimeMS(index);
         }
         uint32_t _getEntryInvocationTimes(uint32_t index){
-            return this->getEntryInvocationTimes(index);
+            return value->getEntryInvocationTimes(index);
         }
     };
-    class slang_ICompileRequest : public slang::ICompileRequest, public slang_SlangRef{
+    class slang_ICompileRequest : public slang_SlangRef{
     GDCLASS(slang_ICompileRequest, slang_SlangRef)
     public:
+        slang::ICompileRequest* value = nullptr;
         slang::ICompileRequest* shift(){
-            return this;
+            return value;
+        }
+        bool has_value(){
+            return value;
+        }
+        slang_ICompileRequest() = default;
+        slang_ICompileRequest(slang::ICompileRequest* ival):value(ival){}
+        void operator=(slang::ICompileRequest* ival){
+            value = ival;
+        }
+        operator slang::ICompileRequest*(){
+            return value;
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_ICompileRequest::has_value);
             BIND_ENUM_CONSTANT(slang_SlangCompileFlags::SLANG_COMPILE_FLAG_NO_MANGLING)
             BIND_ENUM_CONSTANT(slang_SlangCompileFlags::SLANG_COMPILE_FLAG_NO_CODEGEN)
             BIND_ENUM_CONSTANT(slang_SlangCompileFlags::SLANG_COMPILE_FLAG_OBFUSCATE)
@@ -2160,281 +1678,287 @@ namespace slang_cpp {
         }
     public:
         void _setFileSystem(slang_IFileSystem* fileSystem){
-            return this->setFileSystem(static_cast<ISlangFileSystem *>(fileSystem));
+            return value->setFileSystem(fileSystem->value);
         }
         void _setCompileFlags(slang_SlangCompileFlags compileFlags){
-            return this->setCompileFlags(static_cast<SlangCompileFlags>(compileFlags));
+            return value->setCompileFlags(static_cast<SlangCompileFlags>(compileFlags));
         }
         SlangCompileFlags _getCompileFlags(){
-            return this->getCompileFlags();
+            return value->getCompileFlags();
         }
         void _setDumpIntermediates(int enable){
-            return this->setDumpIntermediates(enable);
+            return value->setDumpIntermediates(enable);
         }
         void _setDumpIntermediatePrefix(godot::String prefix){
-            return this->setDumpIntermediatePrefix(prefix.utf8().get_data());
+            return value->setDumpIntermediatePrefix(prefix.utf8().get_data());
         }
         void _setLineDirectiveMode(slang_SlangLineDirectiveMode mode){
-            return this->setLineDirectiveMode(static_cast<SlangLineDirectiveMode>(mode));
+            return value->setLineDirectiveMode(static_cast<SlangLineDirectiveMode>(mode));
         }
         void _setCodeGenTarget(slang_SlangCompileTarget target){
-            return this->setCodeGenTarget(static_cast<SlangCompileTarget>(target));
+            return value->setCodeGenTarget(static_cast<SlangCompileTarget>(target));
         }
         int _addCodeGenTarget(slang_SlangCompileTarget target){
-            return this->addCodeGenTarget(static_cast<SlangCompileTarget>(target));
+            return value->addCodeGenTarget(static_cast<SlangCompileTarget>(target));
         }
         void _setTargetProfile(int targetIndex,slang_SlangProfileID profile){
-            return this->setTargetProfile(targetIndex,static_cast<SlangProfileID>(profile));
+            return value->setTargetProfile(targetIndex,static_cast<SlangProfileID>(profile));
         }
         void _setTargetFlags(int targetIndex,slang_SlangTargetFlags flags){
-            return this->setTargetFlags(targetIndex,static_cast<SlangTargetFlags>(flags));
+            return value->setTargetFlags(targetIndex,static_cast<SlangTargetFlags>(flags));
         }
         void _setTargetFloatingPointMode(int targetIndex,slang_SlangFloatingPointMode mode){
-            return this->setTargetFloatingPointMode(targetIndex,static_cast<SlangFloatingPointMode>(mode));
+            return value->setTargetFloatingPointMode(targetIndex,static_cast<SlangFloatingPointMode>(mode));
         }
         void _setTargetMatrixLayoutMode(int targetIndex,slang_SlangMatrixLayoutMode mode){
-            return this->setTargetMatrixLayoutMode(targetIndex,static_cast<SlangMatrixLayoutMode>(mode));
+            return value->setTargetMatrixLayoutMode(targetIndex,static_cast<SlangMatrixLayoutMode>(mode));
         }
         void _setMatrixLayoutMode(slang_SlangMatrixLayoutMode mode){
-            return this->setMatrixLayoutMode(static_cast<SlangMatrixLayoutMode>(mode));
+            return value->setMatrixLayoutMode(static_cast<SlangMatrixLayoutMode>(mode));
         }
         void _setDebugInfoLevel(slang_SlangDebugInfoLevel level){
-            return this->setDebugInfoLevel(static_cast<SlangDebugInfoLevel>(level));
+            return value->setDebugInfoLevel(static_cast<SlangDebugInfoLevel>(level));
         }
         void _setOptimizationLevel(slang_SlangOptimizationLevel level){
-            return this->setOptimizationLevel(static_cast<SlangOptimizationLevel>(level));
+            return value->setOptimizationLevel(static_cast<SlangOptimizationLevel>(level));
         }
         void _setOutputContainerFormat(slang_SlangContainerFormat format){
-            return this->setOutputContainerFormat(static_cast<SlangContainerFormat>(format));
+            return value->setOutputContainerFormat(static_cast<SlangContainerFormat>(format));
         }
         void _setPassThrough(slang_SlangPassThrough passThrough){
-            return this->setPassThrough(static_cast<SlangPassThrough>(passThrough));
+            return value->setPassThrough(static_cast<SlangPassThrough>(passThrough));
         }
         void _setDiagnosticCallback(SlangDiagnosticCallback callback, slang_VOID_PTR* userData){
-            return this->setDiagnosticCallback(callback,userData);
+            return value->setDiagnosticCallback(callback,userData);
         }
         void _setWriter(slang_SlangWriterChannel channel, slang_IWriter* writer){
-            return this->setWriter(static_cast<SlangWriterChannel>(channel),static_cast<ISlangWriter *>(writer));
+            return value->setWriter(static_cast<SlangWriterChannel>(channel),writer->value);
         }
-        slang_IWriter* _getWriter(slang_SlangWriterChannel channel) {
-            return static_cast<slang_IWriter *>(this->getWriter(
-                    static_cast<SlangWriterChannel>(channel)));
+        slang_IWriter_HEAP_PTR* _getWriter(slang_SlangWriterChannel channel) {
+            auto* a = memnew(slang_IWriter(value->getWriter(
+                    static_cast<SlangWriterChannel>(channel))));
+            auto* ptr = memnew(slang_IWriter_HEAP_PTR(a));
+            ptr->set_shouldFreeData(true);
+            return ptr;
         }
         void _addSearchPath(godot::String path){
-            return this->addSearchPath(path.utf8().get_data());
+            return value->addSearchPath(path.utf8().get_data());
         }
         void _addPreprocessorDefine(godot::String key, godot::String value){
-            return this->addPreprocessorDefine(key.utf8().get_data(),value.utf8().get_data());
+            return this->value->addPreprocessorDefine(key.utf8().get_data(),value.utf8().get_data());
         }
         SlangResult _processCommandLineArguments(godot::TypedArray<godot::String> args, int argCount){
             const char** argv = new const char*[argCount];
             for(int i = 0; i < argCount; i++){
                 argv[i] = args[i].operator godot::String().utf8().get_data();
             }
-            auto result = this->processCommandLineArguments(argv,argCount);
+            auto res = value->processCommandLineArguments(argv,argCount);
             delete[] argv;
-            return result;
+            return res;
         }
         int _addTranslationUnit(slang_SlangSourceLanguage language,godot::String name){
-            return this->addTranslationUnit(static_cast<SlangSourceLanguage>(language), name.utf8().get_data());
+            return value->addTranslationUnit(static_cast<SlangSourceLanguage>(language), name.utf8().get_data());
         }
         void _setDefaultModuleName(godot::String defaultModuleName){
-            return this->setDefaultModuleName(defaultModuleName.utf8().get_data());
+            return value->setDefaultModuleName(defaultModuleName.utf8().get_data());
         }
         void _addTranslationUnitPreprocessorDefine(int translationUnitIndex,godot::String key, godot::String value){
-            return this->addTranslationUnitPreprocessorDefine(translationUnitIndex,key.utf8().get_data(),value.utf8().get_data());
+            return this->value->addTranslationUnitPreprocessorDefine(translationUnitIndex,key.utf8().get_data(),value.utf8().get_data());
         }
         void _addTranslationUnitSourceFile(int translationUnitIndex,godot::String path){
-            return this->addTranslationUnitSourceFile(translationUnitIndex,path.utf8().get_data());
+            return value->addTranslationUnitSourceFile(translationUnitIndex,path.utf8().get_data());
         }
         void _addTranslationUnitSourceString(int translationUnitIndex,godot::String path,godot::String source){
-            return this->addTranslationUnitSourceString(translationUnitIndex,path.utf8().get_data(),source.utf8().get_data());
+            return value->addTranslationUnitSourceString(translationUnitIndex,path.utf8().get_data(),source.utf8().get_data());
         }
         SlangResult _addLibraryReference(godot::String path, slang_VOID_PTR* libData,size_t libDataSize){
-            return this->addLibraryReference(path.utf8().get_data(),libData->get_value(),libDataSize);
+            return value->addLibraryReference(path.utf8().get_data(),libData->get_value(),libDataSize);
         }
         void _addTranslationUnitSourceStringSpan(int translationUnitIndex,godot::String path,godot::String sourceBegin,godot::String sourceEnd){
-            return this->addTranslationUnitSourceStringSpan(translationUnitIndex,path.utf8().get_data(),sourceBegin.utf8().get_data(),sourceEnd.utf8().get_data());
+            return value->addTranslationUnitSourceStringSpan(translationUnitIndex,path.utf8().get_data(),sourceBegin.utf8().get_data(),sourceEnd.utf8().get_data());
         }
         void _addTranslationUnitSourceBlob(int translationUnitIndex,godot::String path,slang_IBlob* sourceBlob){
-            return this->addTranslationUnitSourceBlob(translationUnitIndex,path.utf8().get_data(),static_cast<ISlangBlob *>(sourceBlob));
+            return value->addTranslationUnitSourceBlob(translationUnitIndex,path.utf8().get_data(),sourceBlob->value);
         }
         int _addEntryPoint(int translationUnitIndex,godot::String name,slang_SlangStage stage){
-            return this->addEntryPoint(translationUnitIndex,name.utf8().get_data(),static_cast<SlangStage>(stage));
+            return value->addEntryPoint(translationUnitIndex,name.utf8().get_data(),static_cast<SlangStage>(stage));
         }
         int _addEntryPointEx(int translationUnitIndex,godot::String name,slang_SlangStage stage,int genericArgCount,godot::TypedArray<godot::String>genericArgs){
             const char** args = new const char*[genericArgCount];
             for(int i = 0; i < genericArgCount; i++) {
                 args[i] = genericArgs[i].operator godot::String().utf8().get_data();
             }
-            auto result = this->addEntryPointEx(translationUnitIndex,name.utf8().get_data(),static_cast<SlangStage>(stage),genericArgCount,args);
+            auto res = value->addEntryPointEx(translationUnitIndex,name.utf8().get_data(),static_cast<SlangStage>(stage),genericArgCount,args);
             delete[] args;
-            return result;
+            return res;
         }
         SlangResult _setGlobalGenericArgs(int genericArgCount,godot::TypedArray<godot::String>genericArgs){
             const char** args = new const char*[genericArgCount];
             for(int i = 0; i < genericArgCount; i++) {
                 args[i] = genericArgs[i].operator godot::String().utf8().get_data();
             }
-            auto result = this->setGlobalGenericArgs(genericArgCount,args);
+            auto res = value->setGlobalGenericArgs(genericArgCount,args);
             delete[] args;
-            return result;
+            return res;
         }
         SlangResult _setTypeNameForGlobalExistentialTypeParam(int typeParamIndex,godot::String typeName){
-            return this->setTypeNameForGlobalExistentialTypeParam(typeParamIndex,typeName.utf8().get_data());
+            return value->setTypeNameForGlobalExistentialTypeParam(typeParamIndex,typeName.utf8().get_data());
         }
         SlangResult _setTypeNameForEntryPointExistentialTypeParam(int entryPointIndex,int slotIndex,godot::String typeName){
-            return this->setTypeNameForEntryPointExistentialTypeParam(entryPointIndex,slotIndex,typeName.utf8().get_data());
+            return value->setTypeNameForEntryPointExistentialTypeParam(entryPointIndex,slotIndex,typeName.utf8().get_data());
         }
         void _setAllowGLSLInput(bool value){
-            return this->setAllowGLSLInput(value);
+            return this->value->setAllowGLSLInput(value);
         }
         SlangResult _compile(){
-            return this->compile();
+            return value->compile();
         }
         godot::String _getDiagnosticOutput(slang_NULL* null){
-            auto a = this->getDiagnosticOutput();
+            auto a = value->getDiagnosticOutput();
             if(a == 0)
                 return "";
             return godot::String().utf8(a);
         }
-        SlangResult _getDiagnosticOutputBlob(slang_IBlob_PTR* outBlob){
-            return this->getDiagnosticOutputBlob(reinterpret_cast<ISlangBlob **>(&outBlob->value));
+        SlangResult _getDiagnosticOutputBlob(slang_IBlob* outBlob){
+            return value->getDiagnosticOutputBlob(&outBlob->value);
         }
         int SLANG_MCALL _getDependencyFileCount(){
-            return this->getDependencyFileCount();
+            return value->getDependencyFileCount();
         }
         godot::String _getDependencyFilePath(int index,slang_NULL*null){
-            auto a = this->getDependencyFilePath(index);
+            auto a = value->getDependencyFilePath(index);
             if(a == 0)
                 return "";
             return godot::String().utf8(a);
         }
         int _getTranslationUnitCount(){
-            return this->getTranslationUnitCount();
+            return value->getTranslationUnitCount();
         }
         godot::String _getEntryPointSource(int entryPointIndex){
-            auto a = this->getEntryPointSource(entryPointIndex);
+            auto a = value->getEntryPointSource(entryPointIndex);
             if(a == 0)
                 return "";
             return godot::String().utf8(a);
         }
         godot::String _getEntryPointCode(int entryPointIndex,slang_SIZE* outSize){
             size_t size = 0;
-            auto res = this->getEntryPointCode(entryPointIndex, &size);
+            auto res = value->getEntryPointCode(entryPointIndex, &size);
             outSize->set_value(size);
             if(res == 0)
                 return "";
             return (char*)res;
         }
-        SlangResult _getEntryPointCodeBlob(int entryPointIndex,int targetIndex,slang_IBlob_PTR* outBlob){
-            return this->getEntryPointCodeBlob(entryPointIndex,targetIndex,reinterpret_cast<ISlangBlob **>(&outBlob->value));
+        SlangResult _getEntryPointCodeBlob(int entryPointIndex,int targetIndex,slang_IBlob* outBlob){
+            return value->getEntryPointCodeBlob(entryPointIndex,targetIndex,&outBlob->value);
         }
-        SlangResult _getEntryPointHostCallable(int entryPointIndex,int targetIndex,slang_ISharedLibrary_PTR* outCallable){
-            return this->getEntryPointHostCallable(entryPointIndex,targetIndex,reinterpret_cast<ISlangSharedLibrary **>(&outCallable->value));
+        SlangResult _getEntryPointHostCallable(int entryPointIndex,int targetIndex,slang_ISharedLibrary* outCallable){
+            return value->getEntryPointHostCallable(entryPointIndex,targetIndex,&outCallable->value);
         }
-        SlangResult _getTargetCodeBlob(int targetIndex,slang_IBlob_PTR* outBlob){
-            return this->getTargetCodeBlob(targetIndex,reinterpret_cast<ISlangBlob **>(&outBlob->value));
+        SlangResult _getTargetCodeBlob(int targetIndex,slang_IBlob* outBlob){
+            return value->getTargetCodeBlob(targetIndex,&outBlob->value);
         }
-        SlangResult _getTargetHostCallable(int targetIndex,slang_ISharedLibrary_PTR* outCallable){
-            return this->getTargetHostCallable(targetIndex,reinterpret_cast<ISlangSharedLibrary **>(&outCallable->value));
+        SlangResult _getTargetHostCallable(int targetIndex,slang_ISharedLibrary* outCallable){
+            return value->getTargetHostCallable(targetIndex,&outCallable->value);
         }
         const void* _getCompileRequestCode(slang_SIZE* outSize){
             size_t size = 0;
-            auto res = this->getCompileRequestCode(&size);
+            auto res = value->getCompileRequestCode(&size);
             outSize->set_value(size);
             return res;
         }
-        slang_IMutableFileSystem* _getCompileRequestResultAsFileSystem(){
-            return static_cast<slang_IMutableFileSystem *>(this->getCompileRequestResultAsFileSystem());
+        slang_IMutableFileSystem_HEAP_PTR* _getCompileRequestResultAsFileSystem(){
+            auto* a= memnew(slang_IMutableFileSystem(value->getCompileRequestResultAsFileSystem()));
+            auto* ptr = memnew(slang_IMutableFileSystem_HEAP_PTR(a));
+            ptr -> set_shouldFreeData(true);
+            return ptr;
         }
-        SlangResult _getContainerCode(slang_IBlob_PTR* outBlob){
-            return this->getContainerCode(reinterpret_cast<ISlangBlob **>(&outBlob->value));
+        SlangResult _getContainerCode(slang_IBlob* outBlob){
+            return value->getContainerCode(&outBlob->value);
         }
         SlangResult _loadRepro(slang_IFileSystem* fileSystem,slang_VOID_PTR* data,size_t size){
-            return this->loadRepro(static_cast<ISlangFileSystem *>(fileSystem),data->get_value(),size);
+            return value->loadRepro(fileSystem->value,data->get_value(),size);
         }
-        SlangResult _saveRepro(slang_IBlob_PTR* blob){
-            return this->saveRepro(reinterpret_cast<ISlangBlob **>(&blob->value));
+        SlangResult _saveRepro(slang_IBlob* blob){
+            return value->saveRepro(&blob->value);
         }
         SlangResult _enableReproCapture(){
-            return this->enableReproCapture();
+            return value->enableReproCapture();
         }
-        SlangResult _getProgram(slang_IComponentType_PTR* outProgram){
-            return this->getProgram(reinterpret_cast<slang::IComponentType **>(&outProgram->value));
+        SlangResult _getProgram(slang_IComponentType* outProgram){
+            return value->getProgram(&outProgram->value);
         }
-        SlangResult _getEntryPoint(SlangInt entryPointIndex, slang_IComponentType_PTR* outEntryPoint){
-            return this->getEntryPoint(entryPointIndex, reinterpret_cast<slang::IComponentType **>(&outEntryPoint->value));
+        SlangResult _getEntryPoint(SlangInt entryPointIndex, slang_IComponentType* outEntryPoint){
+            return value->getEntryPoint(entryPointIndex, &outEntryPoint->value);
         }
-        SlangResult _getModule(SlangInt translationUnitIndex, slang_IModule_PTR* outModule){
-            return this->getModule(translationUnitIndex, reinterpret_cast<slang::IModule **>(&outModule->value));
+        SlangResult _getModule(SlangInt translationUnitIndex, slang_IModule* outModule){
+            return value->getModule(translationUnitIndex, &outModule->value);
         }
-        SlangResult _getSession(slang_ISession_PTR* outSession){
-            return this->getSession(reinterpret_cast<slang::ISession **>(&outSession->value));
+        SlangResult _getSession(slang_ISession* outSession){
+            return value->getSession(&outSession->value);
         }
         slang_ProgramLayout* _getReflection(slang_NULL* null){
-            this->getReflection();
+            value->getReflection();
             return nullptr;
         }
         void _setCommandLineCompilerMode(){
-            return this->setCommandLineCompilerMode();
+            return value->setCommandLineCompilerMode();
         }
         SlangResult _addTargetCapability(SlangInt capability,slang_SlangCapabilityID capabilityID){
-            return this->addTargetCapability(capability,static_cast<SlangCapabilityID>(capabilityID));
+            return value->addTargetCapability(capability,static_cast<SlangCapabilityID>(capabilityID));
         }
-        SlangResult _getProgramWithEntryPoints(slang_IComponentType_PTR* outProgram){
-            return this->getProgramWithEntryPoints(reinterpret_cast<slang::IComponentType **>(&outProgram->value));
+        SlangResult _getProgramWithEntryPoints(slang_IComponentType* outProgram){
+            return value->getProgramWithEntryPoints(&outProgram->value);
         }
         SlangResult _isParameterLocationUsed(SlangInt entryPointIndex, SlangInt targetIndex, slang_SlangParameterCategory category,SlangUInt spaceIndex, SlangUInt registerIndex, slang_BOOL* outUsed){
             bool used = 0;
-            auto res = this->isParameterLocationUsed(entryPointIndex, targetIndex, static_cast<SlangParameterCategory>(category), spaceIndex, registerIndex, used);
+            auto res = value->isParameterLocationUsed(entryPointIndex, targetIndex, static_cast<SlangParameterCategory>(category), spaceIndex, registerIndex, used);
             outUsed->set_value(used);
             return res;
         }
         void _setTargetLineDirectiveMode(SlangInt targetIndex, slang_SlangLineDirectiveMode mode){
-            return this->setTargetLineDirectiveMode(targetIndex, static_cast<SlangLineDirectiveMode>(mode));
+            return value->setTargetLineDirectiveMode(targetIndex, static_cast<SlangLineDirectiveMode>(mode));
         }
         void _setTargetForceGLSLScalarBufferLayout(int targetIndex, bool forceScalarLayout){
-            return this->setTargetForceGLSLScalarBufferLayout(targetIndex, forceScalarLayout);
+            return value->setTargetForceGLSLScalarBufferLayout(targetIndex, forceScalarLayout);
         }
         void _overrideDiagnosticSeverity(SlangInt messageID, slang_SlangSeverity overrideSeverity){
-            return this->overrideDiagnosticSeverity(messageID, static_cast<SlangSeverity>(overrideSeverity));
+            return value->overrideDiagnosticSeverity(messageID, static_cast<SlangSeverity>(overrideSeverity));
         }
         int _getDiagnosticFlags(){
-            return this->getDiagnosticFlags();
+            return value->getDiagnosticFlags();
         }
         void _setDiagnosticFlags(int flags){
-            return this->setDiagnosticFlags(flags);
+            return value->setDiagnosticFlags(flags);
         }
         void _setDebugInfoFormat(slang_SlangDebugInfoFormat debugFormat){
-            return this->setDebugInfoFormat(static_cast<SlangDebugInfoFormat>(debugFormat));
+            return value->setDebugInfoFormat(static_cast<SlangDebugInfoFormat>(debugFormat));
         }
         void _setEnableEffectAnnotations(bool value){
-            return this->setEnableEffectAnnotations(value);
+            return this->value->setEnableEffectAnnotations(value);
         }
         void _setReportDownstreamTime(bool value){
-            return this->setReportDownstreamTime(value);
+            return this->value->setReportDownstreamTime(value);
         }
         void _setReportPerfBenchmark(bool value){
-            return this->setReportPerfBenchmark(value);
+            return this->value->setReportPerfBenchmark(value);
         }
         void _setSkipSPIRVValidation(bool value){
-            return this->setSkipSPIRVValidation(value);
+            return this->value->setSkipSPIRVValidation(value);
         }
         void _setTargetUseMinimumSlangOptimization(int targetIndex, bool value){
-            return this->setTargetUseMinimumSlangOptimization(targetIndex, value);
+            return this->value->setTargetUseMinimumSlangOptimization(targetIndex, value);
         }
         void _setIgnoreCapabilityCheck(bool value){
-            return this->setIgnoreCapabilityCheck(value);
+            return this->value->setIgnoreCapabilityCheck(value);
         }
-        // SlangResult _getCompileTimeProfile(slang_IProfiler_PTR* outProfile,bool shouldClear){
-        //     return this->getCompileTimeProfile(reinterpret_cast<ISlangProfiler **>(&outProfile->value), shouldClear);
-        // }
+        SlangResult _getCompileTimeProfile(slang_IProfiler* outProfile,bool shouldClear){
+            return value->getCompileTimeProfile(&outProfile->value, shouldClear);
+        }
         void _setTargetGenerateWholeProgram(int targetIndex, bool value){
-            return this->setTargetGenerateWholeProgram(targetIndex, value);
+            return this->value->setTargetGenerateWholeProgram(targetIndex, value);
         }
         void _setTargetEmbedDXIL(int targetIndex, bool value){
-            return this->setTargetEmbedDXIL(targetIndex, value);
+            return this->value->setTargetEmbedDXIL(targetIndex, value);
         }
     };
 
@@ -2993,11 +2517,14 @@ namespace slang_cpp {
         slang::TargetDesc duplicate(){
             return *value;
         }
-        slang_TargetDesc():value(new slang::TargetDesc()) {}
+        bool has_value(){
+            return value;
+        }
+        slang_TargetDesc():value(memnew(slang::TargetDesc())) {}
         slang_TargetDesc(slang::TargetDesc* desc):value(desc),heap(0){}
         void operator=(slang::TargetDesc* desc){
             if(heap){
-                delete value;
+                godot::memdelete(value);
                 heap = 0;
             }
             value = desc;
@@ -3007,13 +2534,14 @@ namespace slang_cpp {
         }
         ~slang_TargetDesc(){
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
         }
 
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_TargetDesc::has_value);
 
             godot::ClassDB::bind_method(godot::D_METHOD("set_structureSize", "structureSize"),
                                         &slang_TargetDesc::set_structureSize);
@@ -3021,35 +2549,35 @@ namespace slang_cpp {
 //            godot::ClassDB::add_property("slang_TargetDesc", godot::PropertyInfo(godot::Variant::INT, "structureSize"),
 //                                         "set_structureSize", "get_structureSize");
 
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_TARGET_UNKNOWN)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_TARGET_NONE)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_GLSL)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_GLSL_VULKAN_DEPRECATED)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_GLSL_VULKAN_ONE_DESC_DEPRECATED)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_HLSL)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_SPIRV)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_SPIRV_ASM)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_DXBC)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_DXBC_ASM)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_DXIL)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_DXIL_ASM)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_C_SOURCE)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_CPP_SOURCE)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_HOST_EXECUTABLE)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_SHADER_SHARED_LIBRARY)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_SHADER_HOST_CALLABLE)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_CUDA_SOURCE)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_PTX)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_CUDA_OBJECT_CODE)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_OBJECT_CODE)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_HOST_CPP_SOURCE)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_HOST_HOST_CALLABLE)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_CPP_PYTORCH_BINDING)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_METAL)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_METAL_LIB)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_METAL_LIB_ASM)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_HOST_SHARED_LIBRARY)
-            BIND_ENUM_CONSTANT(slang_SlangCompileTarget::SLANG_TARGET_COUNT_OF)
+            BIND_ENUM_CONSTANT(SLANG_TARGET_UNKNOWN)
+            BIND_ENUM_CONSTANT(SLANG_TARGET_NONE)
+            BIND_ENUM_CONSTANT(SLANG_GLSL)
+            BIND_ENUM_CONSTANT(SLANG_GLSL_VULKAN_DEPRECATED)
+            BIND_ENUM_CONSTANT(SLANG_GLSL_VULKAN_ONE_DESC_DEPRECATED)
+            BIND_ENUM_CONSTANT(SLANG_HLSL)
+            BIND_ENUM_CONSTANT(SLANG_SPIRV)
+            BIND_ENUM_CONSTANT(SLANG_SPIRV_ASM)
+            BIND_ENUM_CONSTANT(SLANG_DXBC)
+            BIND_ENUM_CONSTANT(SLANG_DXBC_ASM)
+            BIND_ENUM_CONSTANT(SLANG_DXIL)
+            BIND_ENUM_CONSTANT(SLANG_DXIL_ASM)
+            BIND_ENUM_CONSTANT(SLANG_C_SOURCE)
+            BIND_ENUM_CONSTANT(SLANG_CPP_SOURCE)
+            BIND_ENUM_CONSTANT(SLANG_HOST_EXECUTABLE)
+            BIND_ENUM_CONSTANT(SLANG_SHADER_SHARED_LIBRARY)
+            BIND_ENUM_CONSTANT(SLANG_SHADER_HOST_CALLABLE)
+            BIND_ENUM_CONSTANT(SLANG_CUDA_SOURCE)
+            BIND_ENUM_CONSTANT(SLANG_PTX)
+            BIND_ENUM_CONSTANT(SLANG_CUDA_OBJECT_CODE)
+            BIND_ENUM_CONSTANT(SLANG_OBJECT_CODE)
+            BIND_ENUM_CONSTANT(SLANG_HOST_CPP_SOURCE)
+            BIND_ENUM_CONSTANT(SLANG_HOST_HOST_CALLABLE)
+            BIND_ENUM_CONSTANT(SLANG_CPP_PYTORCH_BINDING)
+            BIND_ENUM_CONSTANT(SLANG_METAL)
+            BIND_ENUM_CONSTANT(SLANG_METAL_LIB)
+            BIND_ENUM_CONSTANT(SLANG_METAL_LIB_ASM)
+            BIND_ENUM_CONSTANT(SLANG_HOST_SHARED_LIBRARY)
+            BIND_ENUM_CONSTANT(SLANG_TARGET_COUNT_OF)
 
             godot::ClassDB::bind_method(godot::D_METHOD("set_format", "format"), &slang_TargetDesc::set_format);
             godot::ClassDB::bind_method(godot::D_METHOD("get_format"), &slang_TargetDesc::get_format);
@@ -3213,14 +2741,17 @@ namespace slang_cpp {
     public:
         slang::SessionDesc* value;
         bool heap = 1;
-        slang_SessionDesc():value(new slang::SessionDesc()){}
+        slang_SessionDesc():value(memnew(slang::SessionDesc())){}
         slang_SessionDesc(slang::SessionDesc* desc):value(desc),heap(0){}
         slang::SessionDesc duplicate(){
             return *value;
         }
+        bool has_value(){
+            return value;
+        }
         void operator=(slang::SessionDesc* desc){
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
             value = desc;
@@ -3231,12 +2762,13 @@ namespace slang_cpp {
         ~slang_SessionDesc(){
 
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_SessionDesc::has_value);
 
             godot::ClassDB::bind_method(godot::D_METHOD("set_structureSize", "structureSize"),
                                         &slang_SessionDesc::set_structureSize);
@@ -3412,11 +2944,14 @@ namespace slang_cpp {
         slang::Modifier duplicate(){
             return *value;
         }
-        slang_Modifier():value(new slang::Modifier) {}
+        bool has_value(){
+            return value;
+        }
+        slang_Modifier():value(memnew(slang::Modifier())) {}
         slang_Modifier(slang::Modifier* modi):value(modi),heap(0){}
         void operator= (slang::Modifier* modi){
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
             value = modi;
@@ -3427,12 +2962,13 @@ namespace slang_cpp {
         ~slang_Modifier(){
 
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_Modifier::has_value);
             BIND_ENUM_CONSTANT(slang::Modifier::ID::NoDiff)
             BIND_ENUM_CONSTANT(slang::Modifier::ID::Static)
             BIND_ENUM_CONSTANT(slang::Modifier::ID::Shared)
@@ -3457,14 +2993,17 @@ namespace slang_cpp {
     public:
         slang::UserAttribute* value = nullptr;
         bool heap = 1;
-        slang_UserAttribute():value(new slang::UserAttribute()){}
+        slang_UserAttribute():value(memnew(slang::UserAttribute())){}
         slang_UserAttribute(slang::UserAttribute* attr):value(attr),heap(0){}
         void operator=(slang::UserAttribute* attr){
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
             value = attr;
+        }
+        bool has_value(){
+            return value;
         }
         operator slang::UserAttribute*(){
             return value;
@@ -3474,12 +3013,13 @@ namespace slang_cpp {
         }
         ~slang_UserAttribute(){
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_UserAttribute::has_value);
             godot::ClassDB::bind_method(godot::D_METHOD("getName"), &slang_UserAttribute::getName);
             godot::ClassDB::bind_method(godot::D_METHOD("getArgumentCount"), &slang_UserAttribute::getArgumentCount);
             godot::ClassDB::bind_method(godot::D_METHOD("getArgumentType", "index"), &slang_UserAttribute::getArgumentType);
@@ -3528,11 +3068,11 @@ namespace slang_cpp {
     public:
         slang::VariableReflection* value = nullptr;
         bool heap = 1;
-        slang_VariableReflection():value(new slang::VariableReflection()){}
+        slang_VariableReflection():value(memnew(slang::VariableReflection())){}
         slang_VariableReflection(slang::VariableReflection* var):value(var),heap(0){}
         void operator=(slang::VariableReflection* var){
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
             value = var;
@@ -3543,15 +3083,19 @@ namespace slang_cpp {
         slang::VariableReflection duplicate(){
             return *value;
         }
+        bool has_value(){
+            return value;
+        }
         ~slang_VariableReflection(){
 
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_VariableReflection::has_value);
             godot::ClassDB::bind_method(godot::D_METHOD("getName"), &slang_VariableReflection::getName);
             godot::ClassDB::bind_method(godot::D_METHOD("getType"), &slang_VariableReflection::getType);
             godot::ClassDB::bind_method(godot::D_METHOD("findModifier", "id"), &slang_VariableReflection::findModifier);
@@ -3584,7 +3128,7 @@ namespace slang_cpp {
             return ptr;
         }
         slang_UserAttribute_HEAP_PTR* findUserAttributeByName(slang_IGlobalSession* session,godot::String name) {
-            auto* ptr = memnew(slang_UserAttribute_HEAP_PTR(memnew(slang_UserAttribute(this->value->findUserAttributeByName(session,name.utf8().get_data())))));
+            auto* ptr = memnew(slang_UserAttribute_HEAP_PTR(memnew(slang_UserAttribute(this->value->findUserAttributeByName(session->value,name.utf8().get_data())))));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
@@ -3603,11 +3147,11 @@ namespace slang_cpp {
     public:
         slang::VariableLayoutReflection* value = nullptr;
         bool heap = 1;
-        slang_VariableLayoutReflection():value(new slang::VariableLayoutReflection()){}
+        slang_VariableLayoutReflection():value(memnew(slang::VariableLayoutReflection())){}
         slang_VariableLayoutReflection(slang::VariableLayoutReflection* refl):value(refl),heap(0){}
         void operator=(slang::VariableLayoutReflection* refl){
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
             value = refl;
@@ -3618,15 +3162,19 @@ namespace slang_cpp {
         slang::VariableLayoutReflection duplicate(){
             return *value;
         }
+        bool has_value(){
+            return value;
+        }
         ~slang_VariableLayoutReflection(){
 
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_VariableLayoutReflection::has_value);
             godot::ClassDB::bind_method(godot::D_METHOD("getVariable"), &slang_VariableLayoutReflection::getVariable);
             godot::ClassDB::bind_method(godot::D_METHOD("getName"), &slang_VariableLayoutReflection::getName);
             godot::ClassDB::bind_method(godot::D_METHOD("findModifier", "id"), &slang_VariableLayoutReflection::findModifier);
@@ -3706,11 +3254,11 @@ namespace slang_cpp {
     public:
         slang::FunctionReflection* value = nullptr;
         bool heap = 1;
-        slang_FunctionReflection():value(new slang::FunctionReflection()){}
+        slang_FunctionReflection():value(memnew(slang::FunctionReflection())){}
         slang_FunctionReflection(slang::FunctionReflection* refl): value(refl),heap(0){}
         void operator=(slang::FunctionReflection* refl){
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
             value = refl;
@@ -3721,15 +3269,19 @@ namespace slang_cpp {
         slang::FunctionReflection duplicate(){
             return *value;
         }
+        bool has_value(){
+            return value;
+        }
         ~slang_FunctionReflection(){
 
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_FunctionReflection::has_value);
             godot::ClassDB::bind_method(godot::D_METHOD("getName"), &slang_FunctionReflection::getName);
             godot::ClassDB::bind_method(godot::D_METHOD("getReturnType"), &slang_FunctionReflection::getReturnType);
             godot::ClassDB::bind_method(godot::D_METHOD("getParameterCount"), &slang_FunctionReflection::getParameterCount);
@@ -3768,7 +3320,7 @@ namespace slang_cpp {
             return ptr;
         }
         slang_UserAttribute_HEAP_PTR* findUserAttributeByName(slang_IGlobalSession* session,godot::String name) {
-            auto* a = memnew(slang_UserAttribute(this->value->findUserAttributeByName(session,name.utf8().get_data())));
+            auto* a = memnew(slang_UserAttribute(this->value->findUserAttributeByName(session->value,name.utf8().get_data())));
             auto* ptr = memnew(slang_UserAttribute_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
@@ -3791,7 +3343,7 @@ namespace slang_cpp {
     public:
         slang::DeclReflection* value;
         bool heap = 1;
-        slang_DeclReflection():value(new slang::DeclReflection()){}
+        slang_DeclReflection():value(memnew(slang::DeclReflection())){}
         slang_DeclReflection(slang::DeclReflection* ref): value(ref),heap(0){}
         void operator=(slang::DeclReflection* ref){
             value = ref;
@@ -3802,10 +3354,13 @@ namespace slang_cpp {
         slang::DeclReflection duplicate(){
             return *value;
         }
+        bool has_value(){
+            return value;
+        }
         ~slang_DeclReflection(){
 
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
         }
@@ -3821,6 +3376,7 @@ namespace slang_cpp {
         };
     private:
         static void _bind_methods(){
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_DeclReflection::has_value);
             BIND_ENUM_CONSTANT(slang_DeclReflection::Kind::Unsupported)
             BIND_ENUM_CONSTANT(slang_DeclReflection::Kind::Struct)
             BIND_ENUM_CONSTANT(slang_DeclReflection::Kind::Func)
@@ -3893,11 +3449,14 @@ namespace slang_cpp {
         slang::TypeReflection duplicate(){
             return *value;
         }
-        slang_TypeReflection(): value(new slang::TypeReflection()){}
+        bool has_value(){
+            return value;
+        }
+        slang_TypeReflection(): value(memnew(slang::TypeReflection())){}
         slang_TypeReflection(slang::TypeReflection* ref):value(ref),heap(0){}
         void operator=(slang::TypeReflection* ref){
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
             value = ref;
@@ -3908,7 +3467,7 @@ namespace slang_cpp {
         ~slang_TypeReflection(){
 
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
         }
@@ -3954,6 +3513,7 @@ namespace slang_cpp {
         };
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_TypeReflection::has_value);
             BIND_ENUM_CONSTANT(slang_TypeReflection::Kind::None)
             BIND_ENUM_CONSTANT(slang_TypeReflection::Kind::Struct)
             BIND_ENUM_CONSTANT(slang_TypeReflection::Kind::Array)
@@ -4109,8 +3669,8 @@ namespace slang_cpp {
                 return "";
             return godot::String().utf8(a);
         }
-        SlangResult getFullName(slang_IBlob_PTR* outNameBlob){
-            return this->value->getFullName(reinterpret_cast<ISlangBlob **>(&outNameBlob->value));
+        SlangResult getFullName(slang_IBlob* outNameBlob){
+            return this->value->getFullName(&outNameBlob->value);
         }
         unsigned int getUserAttributeCount(){
             return this->value->getUserAttributeCount();
@@ -4151,16 +3711,19 @@ namespace slang_cpp {
     public:
         slang::TypeLayoutReflection* value;
         bool heap = 1;
-        slang_TypeLayoutReflection():value(new slang::TypeLayoutReflection()){}
+        slang_TypeLayoutReflection():value(memnew(slang::TypeLayoutReflection())){}
         slang_TypeLayoutReflection(slang::TypeLayoutReflection* refl): value(refl),heap(0){};
         void operator= (slang::TypeLayoutReflection* refl){
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
             this->value = refl;
         }
         operator slang::TypeLayoutReflection*(){
+            return value;
+        }
+        bool has_value(){
             return value;
         }
         slang::TypeLayoutReflection duplicate(){
@@ -4169,12 +3732,13 @@ namespace slang_cpp {
         ~slang_TypeLayoutReflection(){
 
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_TypeLayoutReflection::has_value);
             BIND_ENUM_CONSTANT(slang_SlangParameterCategory::SLANG_PARAMETER_CATEGORY_NONE)
             BIND_ENUM_CONSTANT(slang_SlangParameterCategory::SLANG_PARAMETER_CATEGORY_MIXED)
             BIND_ENUM_CONSTANT(slang_SlangParameterCategory::SLANG_PARAMETER_CATEGORY_CONSTANT_BUFFER)
@@ -4251,16 +3815,19 @@ namespace slang_cpp {
     public:
         slang::TypeParameterReflection* value;
         bool heap = 1;
-        slang_TypeParameterReflection():value(new slang::TypeParameterReflection()){}
+        slang_TypeParameterReflection():value(memnew(slang::TypeParameterReflection())){}
         slang_TypeParameterReflection(slang::TypeParameterReflection* refl):value(refl),heap(0){}
         void operator=(slang::TypeParameterReflection* refl){
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
             value = refl;
         }
         operator slang::TypeParameterReflection*(){
+            return value;
+        }
+        bool has_value(){
             return value;
         }
         slang::TypeParameterReflection duplicate(){
@@ -4269,12 +3836,13 @@ namespace slang_cpp {
         ~slang_TypeParameterReflection(){
 
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_TypeParameterReflection::has_value);
             godot::ClassDB::bind_method(godot::D_METHOD("getName"), &slang_TypeParameterReflection::getName);
             godot::ClassDB::bind_method(godot::D_METHOD("getIndex"), &slang_TypeParameterReflection::getIndex);
             godot::ClassDB::bind_method(godot::D_METHOD("getConstraintCount"), &slang_TypeParameterReflection::getConstraintCount);
@@ -4310,16 +3878,19 @@ namespace slang_cpp {
     public:
         slang::EntryPointReflection* value;
         bool heap = 1;
-        slang_EntryPointReflection():value(new slang::EntryPointReflection()){}
+        slang_EntryPointReflection():value(memnew(slang::EntryPointReflection())){}
         slang_EntryPointReflection(slang::EntryPointReflection* refl):value(refl),heap(0){}
         void operator=(slang::EntryPointReflection* refl){
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
             value = refl;
         }
         operator slang::EntryPointReflection*(){
+            return value;
+        }
+        bool has_value(){
             return value;
         }
         slang::EntryPointReflection duplicate(){
@@ -4328,12 +3899,13 @@ namespace slang_cpp {
         ~slang_EntryPointReflection(){
 
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_EntryPointReflection::has_value);
             BIND_ENUM_CONSTANT(slang_SlangStage::SLANG_STAGE_NONE)
             BIND_ENUM_CONSTANT(slang_SlangStage::SLANG_STAGE_VERTEX)
             BIND_ENUM_CONSTANT(slang_SlangStage::SLANG_STAGE_HULL)
@@ -4446,14 +4018,17 @@ namespace slang_cpp {
     public:
         slang::ShaderReflection* value = nullptr;
         bool heap = 1;
-        slang_ShaderReflection():value(new slang::ShaderReflection()){}
+        slang_ShaderReflection():value(memnew(slang::ShaderReflection())){}
         slang_ShaderReflection(slang::ShaderReflection* refl):value(refl),heap(0){}
         void operator=(slang::ShaderReflection* refl){
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
             value = refl;
+        }
+        bool has_value(){
+            return value;
         }
         operator slang::ShaderReflection*(){
             return value;
@@ -4463,12 +4038,13 @@ namespace slang_cpp {
         }
         ~slang_ShaderReflection(){
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
         }
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_ShaderReflection::has_value);
             godot::ClassDB::bind_method(godot::D_METHOD("getParameterCount"), &slang_ShaderReflection::getParameterCount);
             godot::ClassDB::bind_method(godot::D_METHOD("getTypeParameterCount"), &slang_ShaderReflection::getTypeParameterCount);
             godot::ClassDB::bind_method(godot::D_METHOD("getSession"), &slang_ShaderReflection::getSession);
@@ -4499,8 +4075,11 @@ namespace slang_cpp {
         unsigned getTypeParameterCount() {
             return this->value->getTypeParameterCount();
         }
-        slang_ISession* getSession() {
-            return static_cast<slang_ISession *>(this->value->getSession());
+        slang_ISession_HEAP_PTR* getSession() {
+            auto* a = memnew(slang_ISession(this->value->getSession()));
+            auto* ptr = memnew(slang_ISession_HEAP_PTR(a));
+            ptr->set_shouldFreeData(true);
+            return ptr;
         }
         slang_TypeParameterReflection_HEAP_PTR* getTypeParameterByIndex(unsigned index) {
             auto* a = memnew(slang_TypeParameterReflection(this->value->getTypeParameterByIndex(index)));
@@ -4521,7 +4100,7 @@ namespace slang_cpp {
             return ptr;
         }
         slang_ShaderReflection_HEAP_PTR* get(slang_ICompileRequest* request){
-            auto* a = memnew(slang_ShaderReflection(this->value->get(request)));
+            auto* a = memnew(slang_ShaderReflection(this->value->get(request->value)));
             auto* ptr = memnew(slang_ShaderReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
@@ -4555,21 +4134,21 @@ namespace slang_cpp {
         }
         slang_FunctionReflection_HEAP_PTR* findFunctionByNameInType(slang_TypeReflection* type, godot::String name) {
             auto* a = memnew(slang_FunctionReflection(this->value->findFunctionByNameInType(
-                    reinterpret_cast<slang::TypeReflection *>(&type->value), name.utf8().get_data())));
+                    type->value, name.utf8().get_data())));
             auto* ptr = memnew(slang_FunctionReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_VariableReflection_HEAP_PTR* findVarByNameInType(slang_TypeReflection* type, godot::String name){
             auto* a = memnew(slang_VariableReflection(this->value->findVarByNameInType(
-                    reinterpret_cast<slang::TypeReflection *>(&type->value), name.utf8().get_data())));
+                    type->value, name.utf8().get_data())));
             auto* ptr = memnew(slang_VariableReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_TypeLayoutReflection_HEAP_PTR* getTypeLayout(slang_TypeReflection* type,slang_LayoutRules rules = slang_LayoutRules::Default){
             auto* a = memnew(slang_TypeLayoutReflection(this->value->getTypeLayout(
-                    reinterpret_cast<slang::TypeReflection *>(&type->value),
+                    type->value,
                     static_cast<slang::LayoutRules>(rules))));
             auto* ptr = memnew(slang_TypeLayoutReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
@@ -4581,12 +4160,18 @@ namespace slang_cpp {
             ptr->set_shouldFreeData(true);
             return ptr;
         }
-        slang_TypeReflection_HEAP_PTR* specializeType(slang_TypeReflection* type, SlangInt specializationArgCount, slang_TypeReflection_VECTOR* specializationArgs,slang_IBlob_PTR* outDiagnostics){
-            slang_TypeReflection** refs = memnew(slang_TypeReflection*[specializationArgs->size()]);
+        slang_TypeReflection_HEAP_PTR* specializeType(slang_TypeReflection* type, SlangInt specializationArgCount, slang_TypeReflection_VECTOR* specializationArgs,slang_IBlob* outDiagnostics){
+            size_t size = specializationArgs->size();
+            slang::TypeReflection** refs = new slang::TypeReflection*[size];
+
+            for(int i = 0;i!=size;++i){
+                refs[i] = specializationArgs->at(i)->value;
+            }
+
             auto* a = memnew(slang_TypeReflection(this->value->specializeType(
-                    reinterpret_cast<slang::TypeReflection *>(&type->value), specializationArgCount,
-                    reinterpret_cast<slang::TypeReflection *const *>(refs),
-                    reinterpret_cast<ISlangBlob **>(&outDiagnostics->value))));
+                    type->value, specializationArgCount,
+                    refs,
+                    &outDiagnostics->value)));
             auto* ptr = memnew(slang_TypeReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             delete[] refs;
@@ -4630,11 +4215,11 @@ namespace slang_cpp {
     public:
         slang::SpecializationArg* value = nullptr;
         bool heap = 1;
-        slang_SpecializationArg():value(new slang::SpecializationArg()){}
+        slang_SpecializationArg():value(memnew(slang::SpecializationArg())){}
         slang_SpecializationArg(slang::SpecializationArg* arg): value(arg),heap(0){}
         void operator=(slang::SpecializationArg* arg){
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
             value = arg;
@@ -4642,12 +4227,15 @@ namespace slang_cpp {
         operator slang::SpecializationArg*(){
             return value;
         }
+        bool has_value(){
+            return value;
+        }
         slang::SpecializationArg duplicate(){
             return *value;
         }
         ~slang_SpecializationArg(){
             if(heap){
-                delete value;
+                memdelete(value);
                 heap = 0;
             }
         }
@@ -4659,6 +4247,7 @@ namespace slang_cpp {
         };
     private:
         static void _bind_methods() {
+            godot::ClassDB::bind_method(godot::D_METHOD("has_value"),&slang_SpecializationArg::has_value);
             BIND_ENUM_CONSTANT(Unknown)
             BIND_ENUM_CONSTANT(Type)
 
@@ -4689,34 +4278,25 @@ namespace slang_cpp {
 
 
 
-
     class slang_global : public slang_SlangObject{
     GDCLASS(slang_global,slang_SlangObject)
         static void _bind_methods() {
-            godot::ClassDB::bind_method(godot::D_METHOD("createGlobalSession", "outGlobalSession"), &slang_global::createGlobalSession);
-            godot::ClassDB::bind_method(godot::D_METHOD("IComponentType_shiftToComponent", "ptr"), &slang_global::shiftToComponent<slang_IComponentType>);
-            godot::ClassDB::bind_method(godot::D_METHOD("ITypeConformance_shiftToComponent", "ptr"), &slang_global::shiftToComponent<slang_ITypeConformance>);
-            godot::ClassDB::bind_method(godot::D_METHOD("IEntryPoint_shiftToComponent", "ptr"), &slang_global::shiftToComponent<slang_IEntryPoint>);
-            godot::ClassDB::bind_method(godot::D_METHOD("IModule_shiftToComponent", "ptr"), &slang_global::shiftToComponent<slang_IModule>);
+            godot::ClassDB::bind_static_method("slang_global",godot::D_METHOD("createGlobalSession", "outGlobalSession"), &slang_global::createGlobalSession);
+            godot::ClassDB::bind_static_method("slang_global",godot::D_METHOD("IComponentType_shiftToComponent", "ptr"), &slang_global::shiftToComponent<slang_IComponentType>);
+            godot::ClassDB::bind_static_method("slang_global",godot::D_METHOD("ITypeConformance_shiftToComponent", "ptr"), &slang_global::shiftToComponent<slang_ITypeConformance>);
+            godot::ClassDB::bind_static_method("slang_global",godot::D_METHOD("IEntryPoint_shiftToComponent", "ptr"), &slang_global::shiftToComponent<slang_IEntryPoint>);
+            godot::ClassDB::bind_static_method("slang_global",godot::D_METHOD("IModule_shiftToComponent", "ptr"), &slang_global::shiftToComponent<slang_IModule>);
         }
-        static slang_global* single_ptr;
     public:
-        slang_global(){
-            single_ptr = this;
-        }
-        static slang_global* get_singleton(){
-            return single_ptr;
-        }
-        ~slang_global(){
-            single_ptr = nullptr;
-        }
-
-        SlangResult createGlobalSession(slang_IGlobalSession_PTR* outGlobalSession){
-            return slang::createGlobalSession(reinterpret_cast<slang::IGlobalSession **>(&outGlobalSession->value));
+        static SlangResult createGlobalSession(slang_IGlobalSession* outGlobalSession){
+            return slang::createGlobalSession(&outGlobalSession->value);
         }
         template<typename T>
-        slang_IComponentType* shiftToComponent(T* ptr){
-            return static_cast<slang_IComponentType*>(static_cast<slang::IComponentType *>(ptr));
+        static slang_IComponentType_HEAP_PTR* shiftToComponent(T* ptr){
+            auto* a = memnew(slang_IComponentType(static_cast<slang::IComponentType *>(ptr->value)));
+            auto* mptr = memnew(slang_IComponentType_HEAP_PTR(a));
+            mptr->set_shouldFreeData(true);
+            return mptr;
         }
     };
 

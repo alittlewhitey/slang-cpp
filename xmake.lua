@@ -35,7 +35,7 @@ package("slang_local")
     end)
 package_end()
 
-add_requires("slang_local", "godotcpp4 4.2")
+add_requires("slang_local", "godotcpp4")
 
 target("slang_cpp")
     set_kind("shared")

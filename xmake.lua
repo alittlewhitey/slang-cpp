@@ -35,15 +35,18 @@ package("slang_local")
     end)
 package_end()
 
-add_requires("slang_local", "godotcpp4")
+add_requires("slang_local", "godotcpp4 4.2")
 
-target("slang_cpp")
+PROJECT_NAME = "slang_cpp"
+OUTPUT_DIR = "test/addons/slang/"
+
+target(PROJECT_NAME)
     set_kind("shared")
     add_cxflags("/bigobj", "/MT")
     add_files("src/*.cpp")
     add_defines("TYPED_METHOD_BIND")
     add_includedirs("include","ext")
     add_packages("slang_local", "godotcpp4")
-    set_basename("slang_cpp_$(mode)_$(plat)_$(arch)")
-    set_targetdir("build/bin/$(os)")
+    set_basename(PROJECT_NAME .. "_$(mode)_$(plat)_$(arch)")
+    set_targetdir(OUTPUT_DIR .. "bin/$(os)")
     set_languages("c++20")

@@ -14,5 +14,21 @@ include_directories(include)
 add_library(slang_cpp SHARED
         include/register_slang.h
         include/slang_cpp.h
+        include/slang_enums.h
         src/register_slang.cpp
-        src/slang_cpp.cpp)
+        src/slang_cpp.cpp
+)
+#target_link_libraries(slang_cpp ${PROJECT_SOURCE_DIR}/lib/libgodot-cpp.linux.template_debug.x86_64.a)
+
+file(GLOB LIBS "/home/littlewhite/Projects/Clones/slang-release/lib/*")
+file(GLOB LIBS2 "/home/littlewhite/Projects/Clones/slang/source/**/*.cpp")
+#file(GLOB LIBS3 "/home/littlewhite/Projects/Clones/slang/source/core/unix/*")
+
+target_link_libraries(slang_cpp ${LIBS} # ${LIBS2} # ${LIBS3}
+        #/home/littlewhite/Projects/Clones/slang/source/core/libslang_string-escape-util.so
+        /home/littlewhite/Projects/Clones/slang/source/core/slang-string-escape-util.cpp
+        /home/littlewhite/Projects/Clones/slang/source/core/slang-char-util.cpp
+        /home/littlewhite/Projects/Clones/slang/source/core/slang-string.cpp
+        /home/littlewhite/Projects/Clones/slang/source/core/slang-char-encode.cpp
+        /home/littlewhite/Projects/Clones/godot-cpp/bin/libgodot-cpp.linux.template_debug.x86_64.a
+)

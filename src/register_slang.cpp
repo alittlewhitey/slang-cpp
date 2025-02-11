@@ -53,7 +53,7 @@ void initialize_slang_cpp_module(ModuleInitializationLevel p_level){
     SLANG_BIND_CLASS(IEntryPoint)
     SLANG_BIND_CLASS(IModule)
     SLANG_BIND_CLASS(IWriter)
-    SLANG_BIND_CLASS(IProfiler)
+    // SLANG_BIND_CLASS(IProfiler)
     SLANG_BIND_CLASS(ICompileRequest)
     SLANG_BIND_CLASS(UUID)
     SLANG_BIND_CLASS(CompilerOptionValue)

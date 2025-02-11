@@ -1,0 +1,11 @@
+[configuration]
+entry_symbol = "init_library"
+compatibility_minimum = 4.2
+
+[libraries]
+windows.debug.x86_64 = "bin/windows/slang_cpp_debug_windows_x64.dll"
+windows.release.x86_64 = "bin/windows/slang_cpp_release_windows_x64.dll"
+linux.debug.x86_64 = "bin/linux/slang_cpp_debug_linux_x64.so"
+linux.release.x86_64 = "bin/linux/slang_cpp_release_linux_x64.so"
+macos.debug.x86_64 = "bin/macos/slang_cpp_debug_macos_x64.framework"
+macos.release.x86_64 = "bin/macos/slang_cpp_release_macos_x64.framework"

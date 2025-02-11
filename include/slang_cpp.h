@@ -9,6 +9,7 @@
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/classes/object.hpp>
 #include <godot_cpp/classes/ref.hpp>
+#include <godot_cpp/classes/project_settings.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
 #include "slang_enums.h"
 namespace Slang{
@@ -236,6 +237,7 @@ private:                                                                        
 };
 
 
+
 namespace slang_cpp {
 
     class slang_SlangObject : public godot::Object {
@@ -461,7 +463,7 @@ namespace slang_cpp {
         godot::String get_value_s() const {
             if(value == nullptr)
                 return "";
-            return godot::String().utf8((char*)value);
+            return godot::String::utf8((char*)value);
         }
     };
 
@@ -776,10 +778,12 @@ namespace slang_cpp {
         SlangResult _createSession(slang_SessionDesc *desc, slang_ISession* outSession);
 
         slang_SlangProfileID _findProfile(godot::String name) noexcept {
+            name = godot::ProjectSettings::get_singleton()->globalize_path(name);
             return static_cast<slang_SlangProfileID>(value->findProfile(name.utf8().get_data()));
         }
 
         void _setDownstreamCompilerPath(slang_SlangPassThrough passThrough, godot::String path) {
+            path = godot::ProjectSettings::get_singleton()->globalize_path(path);
             return value->setDownstreamCompilerPath((SlangPassThrough) passThrough,
                                                                           path.utf8().get_data());
         }
@@ -795,7 +799,7 @@ namespace slang_cpp {
             auto a = value->getBuildTagString();
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
 
         SlangResult _setDefaultDownstreamCompiler(slang_SlangSourceLanguage sourceLanguage, slang_SlangPassThrough defaultCompiler) {
@@ -818,6 +822,7 @@ namespace slang_cpp {
         SlangResult _createCompileRequest(slang_ICompileRequest*outCompileRequest);
 
         void _addBuiltins(godot::String sourcePath, godot::String sourceString) {
+            sourcePath = godot::ProjectSettings::get_singleton()->globalize_path(sourcePath);
             return value->addBuiltins(sourcePath.utf8().get_data(),
                                                             sourceString.utf8().get_data());
         }
@@ -845,6 +850,7 @@ namespace slang_cpp {
         SlangResult _saveStdLib(SlangArchiveType archiveType,slang_IBlob*outBlob);
 
         slang_SlangCapabilityID _findCapability(godot::String name) {
+            name = godot::ProjectSettings::get_singleton()->globalize_path(name);
             return static_cast<slang_SlangCapabilityID>(value->findCapability(
                     name.utf8().get_data()));
         }
@@ -871,6 +877,7 @@ namespace slang_cpp {
         }
 
         SlangResult _setSPIRVCoreGrammar(godot::String jsonPath) {
+            jsonPath = godot::ProjectSettings::get_singleton()->globalize_path(jsonPath);
             return value->setSPIRVCoreGrammar(jsonPath.utf8().get_data());
         }
 
@@ -1007,7 +1014,7 @@ namespace slang_cpp {
             auto a = (char*)(value->getBufferPointer());
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
         size_t _getBufferSize(){
             return value->getBufferSize();
@@ -1109,21 +1116,27 @@ namespace slang_cpp {
         }
     public:
         SlangResult _getFileUniqueIdentity(godot::String path, slang_IBlob* outBlob){
+            path = godot::ProjectSettings::get_singleton()->globalize_path(path);
             return value->getFileUniqueIdentity(path.utf8().get_data(), &outBlob->value);
         }
         SlangResult _calcCombinedPath(slang_SlangPathType pathType, godot::String fromPath, godot::String path, slang_IBlob* pathOut){
+            fromPath = godot::ProjectSettings::get_singleton()->globalize_path(fromPath);
+            path = godot::ProjectSettings::get_singleton()->globalize_path(path);
             return value->calcCombinedPath(static_cast<SlangPathType>(pathType), fromPath.utf8().get_data(), path.utf8().get_data(), &pathOut->value);
         }
         SlangResult _getPathType(godot::String path, slang_ENUM<slang_SlangPathType>* pathTypeOut){
+            path = godot::ProjectSettings::get_singleton()->globalize_path(path);
             SlangPathType pathType;
             SlangResult res = value->getPathType(path.utf8().get_data(), &pathType);
             pathTypeOut->set_value(static_cast<slang_SlangPathType>(pathType));
             return res;
         }
         SlangResult _getPath(slang_PathKind kind, godot::String path, slang_IBlob* pathOut){
+            path = godot::ProjectSettings::get_singleton()->globalize_path(path);
             return value->getPath(static_cast<PathKind>(kind), path.utf8().get_data(), &pathOut->value);
         }
         SlangResult _enumeratePathContents(godot::String path,void(*callback)(SlangPathType pathType, const char* name, void* userData) , slang_VOID_PTR userData){
+            path = godot::ProjectSettings::get_singleton()->globalize_path(path);
             return value->enumeratePathContents(path.utf8().get_data(), callback, userData);
         }
         slang_OSPathKind _getOSPathKind(){
@@ -1160,15 +1173,19 @@ namespace slang_cpp {
 
     public:
         SlangResult _saveFile(godot::String path, slang_VOID_PTR* data, size_t size){
+            path = godot::ProjectSettings::get_singleton()->globalize_path(path);
             return value->saveFile(path.utf8().get_data(), data->get_value(), size);
         }
         SlangResult _saveFileBlob(godot::String path, slang_IBlob* blob){
+            path = godot::ProjectSettings::get_singleton()->globalize_path(path);
             return value->saveFileBlob(path.utf8().get_data(), blob->value);
         }
         SlangResult _remove(godot::String path){
+            path = godot::ProjectSettings::get_singleton()->globalize_path(path);
             return value->remove(path.utf8().get_data());
         }
         SlangResult _createDirectory(godot::String path) {
+            path = godot::ProjectSettings::get_singleton()->globalize_path(path);
             return value->createDirectory(path.utf8().get_data());
         }
     };
@@ -1198,13 +1215,15 @@ namespace slang_cpp {
         }
     public:
         SlangFuncPtr _findFuncByName(godot::String name){
+            name = godot::ProjectSettings::get_singleton()->globalize_path(name);
             return value->findFuncByName(name.utf8().get_data());
         }
         godot::String _findSymbolAddressByName(godot::String name){
+            name = godot::ProjectSettings::get_singleton()->globalize_path(name);
             auto a = static_cast<char *>(const_cast<void *>(value->findSymbolAddressByName(name.utf8().get_data())));
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
     };
 
@@ -1235,6 +1254,7 @@ namespace slang_cpp {
 
     public:
         SlangResult _loadSharedLibrary(godot::String path, slang_ISharedLibrary*sharedLibraryOut) {
+            path = godot::ProjectSettings::get_singleton()->globalize_path(path);
             return value->loadSharedLibrary(path.utf8().get_data(),
                                                                       &sharedLibraryOut->value);
         }
@@ -1388,6 +1408,7 @@ namespace slang_cpp {
         }
     public:
         SlangResult _findEntryPointByName(godot::String name, slang_IEntryPoint* outEntryPoint){
+            name = godot::ProjectSettings::get_singleton()->globalize_path(name);
             return value->findEntryPointByName(name.utf8().get_data(),&outEntryPoint->value);
         }
         SlangInt32 _getDefinedEntryPointCount(){
@@ -1400,27 +1421,29 @@ namespace slang_cpp {
             return value->serialize(&outBlob->value);
         }
         SlangResult _writeToFile(godot::String fileName){
+            fileName = godot::ProjectSettings::get_singleton()->globalize_path(fileName);
             return value->writeToFile(fileName.utf8().get_data());
         }
         godot::String _getName(){
             auto a = value->getName();
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
         godot::String _getFilePath(){
             auto a = value->getFilePath();
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
         godot::String _getUniqueIdentity(){
             auto a = value->getUniqueIdentity();
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
         SlangResult _findAndCheckEntryPoint(godot::String name,slang_SlangStage stage,slang_IEntryPoint* outEntryPoint,slang_IBlob* outDiagnostics){
+            name = godot::ProjectSettings::get_singleton()->globalize_path(name);
             return value->findAndCheckEntryPoint(name.utf8().get_data(),static_cast<SlangStage>(stage),&outEntryPoint->value,&outDiagnostics->value);
         }
         SlangInt32 _getDependencyFileCount(){
@@ -1430,7 +1453,7 @@ namespace slang_cpp {
             auto a = value->getDependencyFilePath(index);
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
         slang_DeclReflection_HEAP_PTR* _getModuleReflection() const;
         SlangResult _precompileForTarget(slang_SlangCompileTarget target,slang_IBlob* outDiagnostics){
@@ -1474,7 +1497,7 @@ namespace slang_cpp {
             auto a = value->beginAppendBuffer(maxNumChars);
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
         SlangResult _endAppendBuffer(godot::String buffer,size_t numChars){
             return value->endAppendBuffer(const_cast<char *>(buffer.utf8().get_data()), numChars);
@@ -1526,7 +1549,7 @@ namespace slang_cpp {
             auto a =  value->getEntryName(index);
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
         long _getEntryTimeMS(uint32_t index){
             return value->getEntryTimeMS(index);
@@ -1743,6 +1766,7 @@ namespace slang_cpp {
             return ptr;
         }
         void _addSearchPath(godot::String path){
+            path = godot::ProjectSettings::get_singleton()->globalize_path(path);
             return value->addSearchPath(path.utf8().get_data());
         }
         void _addPreprocessorDefine(godot::String key, godot::String value){
@@ -1758,6 +1782,7 @@ namespace slang_cpp {
             return res;
         }
         int _addTranslationUnit(slang_SlangSourceLanguage language,godot::String name){
+            name = godot::ProjectSettings::get_singleton()->globalize_path(name);
             return value->addTranslationUnit(static_cast<SlangSourceLanguage>(language), name.utf8().get_data());
         }
         void _setDefaultModuleName(godot::String defaultModuleName){
@@ -1767,24 +1792,31 @@ namespace slang_cpp {
             return this->value->addTranslationUnitPreprocessorDefine(translationUnitIndex,key.utf8().get_data(),value.utf8().get_data());
         }
         void _addTranslationUnitSourceFile(int translationUnitIndex,godot::String path){
+            path = godot::ProjectSettings::get_singleton()->globalize_path(path);
             return value->addTranslationUnitSourceFile(translationUnitIndex,path.utf8().get_data());
         }
         void _addTranslationUnitSourceString(int translationUnitIndex,godot::String path,godot::String source){
+            path = godot::ProjectSettings::get_singleton()->globalize_path(path);
             return value->addTranslationUnitSourceString(translationUnitIndex,path.utf8().get_data(),source.utf8().get_data());
         }
         SlangResult _addLibraryReference(godot::String path, slang_VOID_PTR* libData,size_t libDataSize){
+            path = godot::ProjectSettings::get_singleton()->globalize_path(path);
             return value->addLibraryReference(path.utf8().get_data(),libData->get_value(),libDataSize);
         }
         void _addTranslationUnitSourceStringSpan(int translationUnitIndex,godot::String path,godot::String sourceBegin,godot::String sourceEnd){
+            path = godot::ProjectSettings::get_singleton()->globalize_path(path);
             return value->addTranslationUnitSourceStringSpan(translationUnitIndex,path.utf8().get_data(),sourceBegin.utf8().get_data(),sourceEnd.utf8().get_data());
         }
         void _addTranslationUnitSourceBlob(int translationUnitIndex,godot::String path,slang_IBlob* sourceBlob){
+            path = godot::ProjectSettings::get_singleton()->globalize_path(path);
             return value->addTranslationUnitSourceBlob(translationUnitIndex,path.utf8().get_data(),sourceBlob->value);
         }
         int _addEntryPoint(int translationUnitIndex,godot::String name,slang_SlangStage stage){
+            name = godot::ProjectSettings::get_singleton()->globalize_path(name);
             return value->addEntryPoint(translationUnitIndex,name.utf8().get_data(),static_cast<SlangStage>(stage));
         }
         int _addEntryPointEx(int translationUnitIndex,godot::String name,slang_SlangStage stage,int genericArgCount,godot::TypedArray<godot::String>genericArgs){
+            name = godot::ProjectSettings::get_singleton()->globalize_path(name);
             const char** args = new const char*[genericArgCount];
             for(int i = 0; i < genericArgCount; i++) {
                 args[i] = genericArgs[i].operator godot::String().utf8().get_data();
@@ -1818,7 +1850,7 @@ namespace slang_cpp {
             auto a = value->getDiagnosticOutput();
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
         SlangResult _getDiagnosticOutputBlob(slang_IBlob* outBlob){
             return value->getDiagnosticOutputBlob(&outBlob->value);
@@ -1830,7 +1862,7 @@ namespace slang_cpp {
             auto a = value->getDependencyFilePath(index);
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
         int _getTranslationUnitCount(){
             return value->getTranslationUnitCount();
@@ -1839,7 +1871,7 @@ namespace slang_cpp {
             auto a = value->getEntryPointSource(entryPointIndex);
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
         godot::String _getEntryPointCode(int entryPointIndex,slang_SIZE* outSize){
             size_t size = 0;
@@ -2245,7 +2277,7 @@ namespace slang_cpp {
             auto a = stringValue0;
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
 
         void set_stringValue0(godot::String str) {
@@ -2256,7 +2288,7 @@ namespace slang_cpp {
             auto a = stringValue1;
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
 
         void set_stringValue1(godot::String str) {
@@ -2493,13 +2525,14 @@ namespace slang_cpp {
         }
 
         void set_name(godot::String name) {
+            name = godot::ProjectSettings::get_singleton()->globalize_path(name);
             this->name = name.utf8().get_data();
         }
 
         godot::String get_value() const{
             if(value==0)
                 return "";
-            return godot::String().utf8(value);
+            return godot::String::utf8(value);
         }
 
         void set_value(godot::String value) {
@@ -3033,7 +3066,7 @@ namespace slang_cpp {
             auto a = this->value->getName();
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
         uint32_t getArgumentCount() {
             return this->value->getArgumentCount();
@@ -3056,7 +3089,7 @@ namespace slang_cpp {
             const char* v = this->value->getArgumentValueString(index, &size);
             if(v == 0)
                 return "";
-            return godot::String().utf8(v);
+            return godot::String::utf8(v);
         }
     };
 
@@ -3111,7 +3144,7 @@ namespace slang_cpp {
             auto a = this->value->getName();
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
         slang_TypeReflection_HEAP_PTR * getType();
         slang_Modifier_HEAP_PTR* findModifier(slang::Modifier::ID id){
@@ -3129,6 +3162,7 @@ namespace slang_cpp {
             return ptr;
         }
         slang_UserAttribute_HEAP_PTR* findUserAttributeByName(slang_IGlobalSession* session,godot::String name) {
+            name = godot::ProjectSettings::get_singleton()->globalize_path(name);
             auto* ptr = memnew(slang_UserAttribute_HEAP_PTR(memnew(slang_UserAttribute(this->value->findUserAttributeByName(session->value,name.utf8().get_data())))));
             ptr->set_shouldFreeData(true);
             return ptr;
@@ -3202,7 +3236,7 @@ namespace slang_cpp {
             auto a = this->value->getName();
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
         slang_Modifier_HEAP_PTR* findModifier(slang::Modifier::ID id){
             auto* a = memnew(slang_Modifier(this->value->findModifier(id)));
@@ -3236,7 +3270,7 @@ namespace slang_cpp {
             auto a = this->value->getSemanticName();
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
         size_t getSemanticIndex(){
             return this->value->getSemanticIndex();
@@ -3299,7 +3333,7 @@ namespace slang_cpp {
             auto a = this->value->getName();
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
         slang_TypeReflection_HEAP_PTR * getReturnType();
         unsigned int getParameterCount() {
@@ -3321,6 +3355,7 @@ namespace slang_cpp {
             return ptr;
         }
         slang_UserAttribute_HEAP_PTR* findUserAttributeByName(slang_IGlobalSession* session,godot::String name) {
+            name = godot::ProjectSettings::get_singleton()->globalize_path(name);
             auto* a = memnew(slang_UserAttribute(this->value->findUserAttributeByName(session->value,name.utf8().get_data())));
             auto* ptr = memnew(slang_UserAttribute_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
@@ -3668,7 +3703,7 @@ namespace slang_cpp {
             auto a =this->value->getName();
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
         SlangResult getFullName(slang_IBlob* outNameBlob){
             return this->value->getFullName(&outNameBlob->value);
@@ -3683,6 +3718,7 @@ namespace slang_cpp {
             return ptr;
         }
         slang_UserAttribute_HEAP_PTR* findUserAttributeByName(godot::String name){
+            name = godot::ProjectSettings::get_singleton()->globalize_path(name);
             auto* a = memnew(slang_UserAttribute(this->value->findUserAttributeByName(name.utf8().get_data())));
             auto* ptr = memnew(slang_UserAttribute_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
@@ -3854,7 +3890,7 @@ namespace slang_cpp {
             auto a = this->value->getName();
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
         unsigned getIndex() {
             return this->value->getIndex();
@@ -3943,13 +3979,13 @@ namespace slang_cpp {
             auto a = this->value->getName();
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
         godot::String getNameOverride(){
             auto a = this->value->getNameOverride();
             if(a == 0)
                 return "";
-            return godot::String().utf8(a);
+            return godot::String::utf8(a);
         }
         unsigned getParameterCount() {
             return this->value->getParameterCount();
@@ -4089,6 +4125,7 @@ namespace slang_cpp {
             return ptr;
         }
         slang_TypeParameterReflection_HEAP_PTR* findTypeParameter(godot::String name) {
+            name = godot::ProjectSettings::get_singleton()->globalize_path(name);
             auto* a = memnew(slang_TypeParameterReflection(this->value->findTypeParameter(name.utf8().get_data())));
             auto* ptr = memnew(slang_TypeParameterReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
@@ -4122,18 +4159,21 @@ namespace slang_cpp {
             return this->value->getGlobalConstantBufferSize();
         }
         slang_TypeReflection_HEAP_PTR* findTypeByName(godot::String name){
+            name = godot::ProjectSettings::get_singleton()->globalize_path(name);
             auto* a = memnew(slang_TypeReflection(this->value->findTypeByName(name.utf8().get_data())));
             auto* ptr = memnew(slang_TypeReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_FunctionReflection_HEAP_PTR* findFunctionByName(godot::String name) {
+            name = godot::ProjectSettings::get_singleton()->globalize_path(name);
             auto* a = memnew(slang_FunctionReflection(this->value->findFunctionByName(name.utf8().get_data())));
             auto* ptr = memnew(slang_FunctionReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
             return ptr;
         }
         slang_FunctionReflection_HEAP_PTR* findFunctionByNameInType(slang_TypeReflection* type, godot::String name) {
+            name = godot::ProjectSettings::get_singleton()->globalize_path(name);
             auto* a = memnew(slang_FunctionReflection(this->value->findFunctionByNameInType(
                     type->value, name.utf8().get_data())));
             auto* ptr = memnew(slang_FunctionReflection_HEAP_PTR(a));
@@ -4141,6 +4181,7 @@ namespace slang_cpp {
             return ptr;
         }
         slang_VariableReflection_HEAP_PTR* findVarByNameInType(slang_TypeReflection* type, godot::String name){
+            name = godot::ProjectSettings::get_singleton()->globalize_path(name);
             auto* a = memnew(slang_VariableReflection(this->value->findVarByNameInType(
                     type->value, name.utf8().get_data())));
             auto* ptr = memnew(slang_VariableReflection_HEAP_PTR(a));
@@ -4156,6 +4197,7 @@ namespace slang_cpp {
             return ptr;
         }
         slang_EntryPointReflection_HEAP_PTR* findEntryPointByName(godot::String name) {
+            name = godot::ProjectSettings::get_singleton()->globalize_path(name);
             auto* a = memnew(slang_EntryPointReflection(this->value->findEntryPointByName(name.utf8().get_data())));
             auto* ptr = memnew(slang_EntryPointReflection_HEAP_PTR(a));
             ptr->set_shouldFreeData(true);
@@ -4187,7 +4229,7 @@ namespace slang_cpp {
             outCount->set_value(count);
             if(str == 0)
                 return "";
-            return godot::String().utf8(str);
+            return godot::String::utf8(str);
         }
         slang_TypeLayoutReflection_HEAP_PTR* getGlobalParamsTypeLayout(){
             auto* a = memnew(slang_TypeLayoutReflection(this->value->getGlobalParamsTypeLayout()));

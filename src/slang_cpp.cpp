@@ -86,6 +86,7 @@ namespace slang_cpp{
     }
 
     slang_IModule_HEAP_PTR *slang_ISession::_loadModule(godot::String moduleName, slang_IBlob *outDiagnostics) const {
+        moduleName = godot::ProjectSettings::get_singleton()->globalize_path(moduleName);
         auto* a = memnew(slang_IModule(value->loadModule(moduleName.utf8().get_data(),
                                                       &outDiagnostics->value)));
         auto* ptr = memnew(slang_IModule_HEAP_PTR(a));
@@ -94,6 +95,8 @@ namespace slang_cpp{
     }
 
     slang_IModule *slang_ISession::_loadModuleFromSource(godot::String moduleName, godot::String path, slang_IBlob *source,slang_IBlob *outDiagnostics) const {
+        moduleName = godot::ProjectSettings::get_singleton()->globalize_path(moduleName);
+        path = godot::ProjectSettings::get_singleton()->globalize_path(path);
         return dynamic_cast<slang_IModule *>(value->loadModuleFromSource(moduleName.utf8().get_data(),
                                                                                          path.utf8().get_data(),
                                                                                          dynamic_cast<slang::IBlob *>(source),
@@ -174,6 +177,8 @@ namespace slang_cpp{
     slang_IModule *
     slang_ISession::_loadModuleFromIRBlob(godot::String moduleName, godot::String path, slang_IBlob *source,
                                          slang_IBlob *outDiagnostics) {
+        moduleName = godot::ProjectSettings::get_singleton()->globalize_path(moduleName);
+        path = godot::ProjectSettings::get_singleton()->globalize_path(path);
         return dynamic_cast<slang_IModule *>(value->loadModuleFromIRBlob(moduleName.utf8().get_data(),
                                                                                          path.utf8().get_data(),
                                                                                          source->value,
@@ -188,6 +193,7 @@ namespace slang_cpp{
     }
 
     bool slang_ISession::_isBinaryModuleUpToDate(godot::String modulePath, slang_IBlob *binaryModuleBlob) {
+        modulePath = godot::ProjectSettings::get_singleton()->globalize_path(modulePath);
         return value->isBinaryModuleUpToDate(modulePath.utf8().get_data(),
                                                              binaryModuleBlob->value);
     }
@@ -195,6 +201,8 @@ namespace slang_cpp{
     slang_IModule_HEAP_PTR *
     slang_ISession::_loadModuleFromSourceString(godot::String moduleName, godot::String path, godot::String string,
                                                slang_IBlob*outDiagnostics) {
+        moduleName = godot::ProjectSettings::get_singleton()->globalize_path(moduleName);
+        path = godot::ProjectSettings::get_singleton()->globalize_path(path);
         auto* a = memnew(slang_IModule(value->loadModuleFromSourceString(
                 moduleName.utf8().get_data(), path.utf8().get_data(), string.utf8().get_data(),
                 &outDiagnostics->value)));
@@ -405,6 +413,7 @@ namespace slang_cpp{
     }
 
     SlangResult slang_IFileSystem::_loadFile(godot::String path, slang_IBlob *outBlob) {
+        path = godot::ProjectSettings::get_singleton()->globalize_path(path);
         return value->loadFile(path.utf8().get_data(), &outBlob->value);
     }
 }
